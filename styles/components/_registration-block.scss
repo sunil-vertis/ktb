@@ -11,18 +11,22 @@
     gap: var(--spacing-6, 1.5rem);
   }
 
+  // Flatten circle / label / line to flex children of the nav (Figma: group | flex line | group…)
+  // without changing markup — same DOM order as Figma once items use display: contents.
+  &__stepper-item {
+    display: contents;
+  }
+
   &__stepper {
     display: flex;
     align-items: center;
-    gap: var(--spacing-6, 1.5rem);
+    flex-wrap: nowrap;
+    gap: 0;
+    box-sizing: border-box;
     width: 100%;
-  }
-
-  &__stepper-item {
-    display: flex;
-    align-items: center;
-    flex: 1 1 0;
+    max-width: 100%;
     min-width: 0;
+    align-self: stretch;
   }
 
   &__step-circle {
@@ -37,6 +41,14 @@
     font-weight: 500;
     line-height: 1.6;
     flex-shrink: 0;
+    // Figma 10px between circle and label (desktop); label is display:none on small screens.
+    margin-inline-end: 0.625rem;
+
+    @media (max-width: 1023px) {
+      &:has(+ .registration-block__step-label + .registration-block__step-line) {
+        margin-inline-end: var(--spacing-6, 1.5rem);
+      }
+    }
 
     &--current {
       background: var(--brand-secondary, #185fa5);
@@ -49,14 +61,23 @@
 
   &__step-label {
     display: none;
+    flex-shrink: 0;
+
+    // Figma spacing-6 between [circle + label] group and the connector line.
+    &:has(+ .registration-block__step-line) {
+      margin-inline-end: var(--spacing-6, 1.5rem);
+    }
   }
 
   &__step-line {
+    align-self: center;
     height: 2px;
-    margin-left: var(--spacing-6, 1.5rem);
+    flex: 1 0 0;
+    min-width: 1px;
     border-radius: 2px;
     background: var(--neutral-200, #d6d6d6);
-    flex: 1 1 auto;
+    // Figma spacing-6 between line and the next step’s circle.
+    margin-inline-end: var(--spacing-6, 1.5rem);
 
     &--current {
       background: var(--brand-secondary, #185fa5);
@@ -471,7 +492,7 @@
 
     &__step-label {
       display: inline;
-      margin-left: 0.625rem;
+      margin-left: 0;
       color: var(--neutral-300, #969696);
       font-family: var(--font-prompt);
       font-size: calc(var(--type-body-small-mobile, 0.875rem) * var(--font-scale-factor, 1));

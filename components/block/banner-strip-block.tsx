@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { BannerStripBlock as BannerStripBlockCms } from '@/lib/optimizely/types/generated'
 import styles from '@/styles/components/banner-strip-block.module.scss'
+import clsx from 'clsx'
 
 export type BannerStripBlockProps = Partial<
   Pick<
@@ -59,7 +60,7 @@ export default function BannerStripBlock({
 
   return (
     <section className={styles.bannerStrip} aria-label="Banner strip notice">
-      <div className={styles.container}>
+      <div className={clsx(styles.container, 'container mx-auto px-4')}>
         <p className={styles.message} data-epi-edit="message">
           {message}
         </p>

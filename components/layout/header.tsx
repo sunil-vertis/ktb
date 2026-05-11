@@ -246,7 +246,7 @@ export function Header({ locale }: { locale: string }) {
   return (
     <header className="site-header">
       <div className="site-header__utility">
-        <div className="site-header__utility-inner">
+        <div className="site-header__utility-inner container mx-auto px-4">
           <div className="site-header__utility-left">
             {UTILITY_LEFT_LINKS.map((label, i) => (
               <Link
@@ -323,7 +323,7 @@ export function Header({ locale }: { locale: string }) {
         </div>
       </div>
 
-      <div className="site-header__main">
+      <div className="site-header__main container mx-auto px-4">
         <div className="site-header__main-inner">
           <details className="site-header__mobile-menu">
             <summary className="site-header__mobile-summary">

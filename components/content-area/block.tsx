@@ -105,4 +105,6 @@ export const blocks = {
   ProductDetailsPageBlock,
 } as const
 
+export type BlockTypeName = keyof typeof blocks
+
 export default blocksMapperFactory(blocks)

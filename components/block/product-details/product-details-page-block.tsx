@@ -1,6 +1,7 @@
 import clsx from 'clsx'
 import dynamic from 'next/dynamic'
 
+import { blocks, type BlockTypeName } from '@/components/content-area/block'
 import { ProductDetailsAnchorTabs } from './ProductDetailsAnchorTabs'
 import { pdpMainColumnSectionId } from './pdp-main-column-section-id'
 
@@ -9,6 +10,12 @@ const Block = dynamic(() => import('@/components/content-area/block'), {
 })
 
 type BlockRow = Record<string, unknown> & { __typename?: string | null }
+
+type BlockRowResolved = BlockRow & { __typename: BlockTypeName }
+
+function isBlockTypeName(v: unknown): v is BlockTypeName {
+  return typeof v === 'string' && v !== '' && v in blocks
+}
 
 type AnchorTabRow = {
   __typename?: string | null
@@ -30,7 +37,8 @@ export type ProductDetailsPageBlockCmsProps = {
 function stripTypename<T extends { __typename?: string }>(
   node: T
 ): Omit<T, '__typename'> {
-  const { __typename: _t, ...rest } = node
+  const { __typename, ...rest } = node
+  void __typename
   return rest
 }
 
@@ -60,10 +68,16 @@ export default function ProductDetailsPageBlock({
     .filter((x): x is NonNullable<typeof x> => x != null)
 
   const left = (LeftContent ?? []).filter(
-    (b): b is BlockRow => b != null && Boolean(b.__typename)
+    (b): b is BlockRowResolved =>
+      b != null &&
+      typeof b === 'object' &&
+      isBlockTypeName((b as BlockRow).__typename)
   )
   const right = (RightContent ?? []).filter(
-    (b): b is BlockRow => b != null && Boolean(b.__typename)
+    (b): b is BlockRowResolved =>
+      b != null &&
+      typeof b === 'object' &&
+      isBlockTypeName((b as BlockRow).__typename)
   )
 
   const usedAnchorIds = new Set<string>()
@@ -88,7 +102,7 @@ export default function ProductDetailsPageBlock({
         >
           <div className="pdpSectionContentLeft">
             {left.map((block, index) => {
-              const { __typename, ...props } = block
+              const { __typename } = block
               if (!__typename) return null
               const anchorBase = pdpMainColumnSectionId(__typename)
               const wrapperId =

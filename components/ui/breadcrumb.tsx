@@ -23,7 +23,7 @@ export function Breadcrumb({ items, className, ariaLabel = 'Breadcrumb' }: Bread
 
   return (
     <nav className={clsx('breadcrumb', className)} aria-label={ariaLabel}>
-      <div className="breadcrumb__inner">
+      <div className="breadcrumb__inner container mx-auto px-4">
         <ol className="breadcrumb__list type-body-small-regular">
           {items.map((item, index) => {
             const isLast = index === items.length - 1

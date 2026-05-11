@@ -1,4 +1,4 @@
-import { DocumentNode } from 'graphql'
+import { DocumentNode, type ExecutionResult } from 'graphql'
 import { print } from 'graphql/language/printer'
 import { getSdk } from './types/generated'
 import { isVercelError } from '../type-guards'
@@ -18,6 +18,8 @@ interface OptimizelyFetch<Variables> extends OptimizelyFetchOptions {
 interface GraphqlResponse<Response> {
   errors: unknown[]
   data: Response
+  /** Optional GraphQL response payload (e.g. tracing); forwarded when present. */
+  extensions?: unknown
 }
 
 function describeFetchFailure(e: unknown): string {
@@ -32,19 +34,31 @@ const optimizelyFetch = async <Response, Variables = object>({
   query,
   variables,
   headers,
-  // Same GraphQL URL for every POST; `force-cache` can ignore body and reuse wrong locale.
-  cache = 'no-store',
+  cache,
   preview,
   cacheTag,
 }: OptimizelyFetch<Variables>): Promise<
   GraphqlResponse<Response> & { headers: Headers }
 > => {
   const configHeaders = headers ?? {}
+  let resolvedCache: RequestCache | undefined = cache
 
   if (preview) {
     configHeaders.Authorization = `Basic ${process.env.OPTIMIZELY_PREVIEW_SECRET}`
-    cache = 'no-store'
+    resolvedCache = 'no-store'
   }
+
+  // `cache: 'no-store'` implies revalidate 0 and breaks static prerender of public routes.
+  // Published fetches use time-based revalidation so `next build` can pre-render /[locale].
+  const useNoStore = resolvedCache === 'no-store'
+  const revalidateSeconds = Number.parseInt(
+    process.env.OPTIMIZELY_FETCH_REVALIDATE_SECONDS ?? '300',
+    10
+  )
+  const revalidate =
+    Number.isFinite(revalidateSeconds) && revalidateSeconds > 0
+      ? revalidateSeconds
+      : 300
   const cacheTags = ['optimizely-content']
   if (cacheTag) {
     cacheTags.push(cacheTag)
@@ -73,8 +87,14 @@ const optimizelyFetch = async <Response, Variables = object>({
         ...(query && { query }),
         ...(variables && { variables }),
       }),
-      cache,
-      next: { tags: cacheTags },
+      ...(useNoStore
+        ? { cache: 'no-store' as const, next: { tags: cacheTags } }
+        : {
+            next: {
+              revalidate,
+              tags: cacheTags,
+            },
+          }),
     })
 
     const result = await response.json()
@@ -110,13 +130,14 @@ async function requester<R, V>(
     ...options,
   })
 
-  // Forward GraphQL `errors` (SDK expects ExecutionResult); callers can log / handle.
-  return {
+  // Forward GraphQL `errors` / `extensions`; SDK `Requester` expects `ExecutionResult` shape.
+  const out = {
     data: request.data,
     errors: request.errors,
     extensions: request.extensions,
     _headers: request.headers,
   }
+  return out as unknown as ExecutionResult<R, unknown>
 }
 
 export const optimizely = getSdk(requester)

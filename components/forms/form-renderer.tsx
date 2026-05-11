@@ -313,6 +313,7 @@ function StepIndicator({
                       ? 'registration-block__step-line--current'
                       : ''
                 }`}
+                aria-hidden="true"
               />
             )}
           </div>

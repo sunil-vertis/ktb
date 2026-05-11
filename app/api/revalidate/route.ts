@@ -56,7 +56,10 @@ async function extractDocId(request: NextRequest): Promise<string> {
 }
 
 async function fetchContentByGuid(guid: string) {
-  const { data, errors } = await optimizely.GetContentByGuid({ guid })
+  const { data, errors } = await optimizely.GetContentByGuid(
+    { guid },
+    { cache: 'no-store' }
+  )
   if (errors) {
     console.error(errors)
     throw new Error('Error fetching content')

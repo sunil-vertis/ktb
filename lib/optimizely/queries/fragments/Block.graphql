@@ -1,0 +1,528 @@
+fragment HeroBlockFragment on HeroBlock {
+  title
+  subtitle
+  decorationColorsPrimary
+  decorationColorsSecondary
+  showDecoration
+}
+
+fragment ContactBlockFragment on ContactBlock {
+  title
+  description
+}
+
+fragment LogosBlockFragment on LogosBlock {
+  logos {
+    __typename
+    ... on LogoItemBlock {
+      src
+      alt
+    }
+  }
+}
+
+fragment PortfolioGridBlockFragment on PortfolioGridBlock {
+  title
+  items {
+    __typename
+    ... on PortfolioItemBlock {
+      title
+      description
+      imageUrl
+      link
+    }
+  }
+}
+
+fragment ServicesBlockFragment on ServicesBlock {
+  services {
+    __typename
+    ... on ServiceItem {
+      title
+      description
+      icon
+    }
+  }
+}
+
+fragment TestimonialsBlockFragment on TestimonialsBlock {
+  title
+  testimonials {
+    __typename
+    ... on TestimonialItemBlock {
+      fullName
+      position
+      content
+      avatarSrc
+    }
+  }
+}
+
+fragment ProfileBlockFragment on ProfileBlock {
+  imageSrc
+  bio
+  name
+  title
+}
+
+fragment AvailabilityBlockFragment on AvailabilityBlock {
+  availability
+  projectTypes
+}
+
+fragment StoryBlockFragment on StoryBlock {
+  story
+  highlights
+}
+
+fragment BannerStripBlockFragment on BannerStripBlock {
+  message
+  isDismissible
+  dismissStorageKey
+  closeAriaLabel
+}
+
+fragment KeyFeatureBlockFragment on KeyFeatureBlock {
+  Title
+  Items {
+    __typename
+    ... on KeyFeatureItemBlock {
+      Title
+      Description
+      Logo {
+        __typename
+        ... on ImageMedia {
+          _assetMetadata {
+            url
+          }
+        }
+        ... on GenericMedia {
+          _assetMetadata {
+            url
+          }
+        }
+      }
+    }
+  }
+}
+
+fragment PromoHighlightsBlockFragment on PromoHighlightsBlock {
+  ExchangeTitle
+  InterestTitle
+  UpdatedAtLabel
+  ExchangeViewAllLabel
+  ExchangeViewAllLink {
+    text
+    title
+    target
+    url {
+      default
+      base
+      hierarchical
+      internal
+    }
+  }
+  BackgroundColor
+  ExchangeRates {
+    __typename
+    ... on PromoExchangeRateItemBlock {
+      Code
+      Buy
+      Sell
+      Flag {
+        __typename
+        ... on ImageMedia {
+          _assetMetadata {
+            url
+          }
+        }
+        ... on GenericMedia {
+          _assetMetadata {
+            url
+          }
+        }
+      }
+    }
+  }
+  InterestRates {
+    __typename
+    ... on PromoInterestRateItemBlock {
+      Id
+      Title
+      Description
+      Image {
+        __typename
+        ... on ImageMedia {
+          _assetMetadata {
+            url
+          }
+        }
+        ... on GenericMedia {
+          _assetMetadata {
+            url
+          }
+        }
+      }
+      CtaLabel
+      CtaHref {
+        text
+        title
+        target
+        url {
+          default
+          base
+          hierarchical
+          internal
+        }
+      }
+    }
+  }
+}
+
+fragment CtaSectionBlockFragment on CtaSectionBlock {
+  Title
+  Subtitle
+  PrimaryLabel
+  PrimaryHref {
+    text
+    title
+    target
+    url {
+      default
+      base
+      hierarchical
+      internal
+    }
+  }
+  SecondaryLabel
+  SecondaryHref {
+    text
+    title
+    target
+    url {
+      default
+      base
+      hierarchical
+      internal
+    }
+  }
+}
+
+fragment QuickLinkBlockFragment on QuickLinkBlock {
+  sectionTitle
+  sectionSubtitle
+  items {
+    __typename
+    ... on QuickLinkItem {
+      label
+      quickLinkLink: link {
+        text
+        title
+        target
+        url {
+          default
+          base
+          hierarchical
+          internal
+        }
+      }
+      icon {
+        __typename
+        ... on ImageMedia {
+          _assetMetadata {
+            url
+          }
+        }
+        ... on GenericMedia {
+          _assetMetadata {
+            url
+          }
+        }
+      }
+      mobileLabelLine1
+      mobileLabelLine2
+    }
+  }
+}
+
+fragment CampaignBannerBlockFragment on CampaignBannerBlock {
+  BadgeLabel
+  Title
+  Subtitle
+  TitleColor
+  SubtitleColor
+  DesktopImageSrc {
+    __typename
+    ... on ImageMedia {
+      _assetMetadata {
+        url
+      }
+    }
+    ... on GenericMedia {
+      _assetMetadata {
+        url
+      }
+    }
+  }
+  MobileImageSrc {
+    __typename
+    ... on ImageMedia {
+      _assetMetadata {
+        url
+      }
+    }
+    ... on GenericMedia {
+      _assetMetadata {
+        url
+      }
+    }
+  }
+}
+
+fragment HeroBannerBlockFragment on HeroBannerBlock {
+  activeDotIndex
+  items {
+    __typename
+    ... on HeroBannerItem {
+      badgeLabel
+      title
+      subtitle
+      primaryCtaLabel
+      primaryCtaHref {
+        text
+        title
+        target
+        url {
+          default
+          base
+          hierarchical
+          internal
+        }
+      }
+      secondaryCtaLabel
+      secondaryCtaHref {
+        text
+        title
+        target
+        url {
+          default
+          base
+          hierarchical
+          internal
+        }
+      }
+      desktopImageSrc {
+        __typename
+        ... on ImageMedia {
+          _assetMetadata {
+            url
+          }
+        }
+        ... on GenericMedia {
+          _assetMetadata {
+            url
+          }
+        }
+      }
+      mobileImageSrc {
+        __typename
+        ... on ImageMedia {
+          _assetMetadata {
+            url
+          }
+        }
+        ... on GenericMedia {
+          _assetMetadata {
+            url
+          }
+        }
+      }
+    }
+  }
+}
+
+fragment CardListingBlockFragment on CardListingBlock {
+  title
+  subtitle
+  allChipLabel
+  pageSize
+  backgroundColor
+  paginationAriaLabel
+  showPaginationSummary
+  emptyLabel
+  loadMoreLabel
+  items {
+    __typename
+    ... on CardListingItemBlock {
+      _metadata {
+        key
+      }
+      title
+      # Aliased: merged with PortfolioGridBlock.items under _IContent, where
+      # PortfolioItemBlock uses String description/link — GraphQL requires
+      # distinct response names for incompatible types.
+      cardListingDescription: description {
+        html
+      }
+      image {
+        key
+        url {
+          default
+          base
+          hierarchical
+          internal
+        }
+        item {
+          __typename
+          ... on ImageMedia {
+            _assetMetadata {
+              url
+            }
+          }
+        }
+      }
+      imageFit
+      imageFlush
+      badgeLabel
+      badgeVariant
+      chipId
+      linkLabel
+      cardListingLink: link {
+        text
+        title
+        target
+        url {
+          default
+          base
+          hierarchical
+          internal
+        }
+      }
+    }
+  }
+  chipFilters {
+    __typename
+    ... on CardListingChipFilterBlock {
+      id
+      label
+    }
+  }
+}
+
+fragment ItemsInContentArea on _IContent {
+  __typename
+  ...HeroBlockFragment
+  ...ContactBlockFragment
+  ...LogosBlockFragment
+  ...PortfolioGridBlockFragment
+  ...ServicesBlockFragment
+  ...TestimonialsBlockFragment
+  ...ProfileBlockFragment
+  ...AvailabilityBlockFragment
+  ...StoryBlockFragment
+  ...BannerStripBlockFragment
+  ...KeyFeatureBlockFragment
+  ...PromoHighlightsBlockFragment
+  ...CtaSectionBlockFragment
+  ...QuickLinkBlockFragment
+  ...HeroBannerBlockFragment
+  ...CampaignBannerBlockFragment
+  ...CardListingBlockFragment
+  ...EligibilitySummaryBlockFragment
+  ...ProductHighlightsBlockFragment
+  ...PersonalLoanCalculatorBlockFragment
+  ...LoanInterestRatesSectionBlockFragment
+  ...LoanLimitGrantedSectionBlockFragment
+  ...LoanCalculationExamplesSectionBlockFragment
+  ...LoanTermMediaGallerySectionBlockFragment
+  ...LoanInterestGroupBlockFragment
+  ...ProductDetailsConditionsBlockFragment
+  ...DownloadSectionBlockFragment
+  ...ProductFaqBlockFragment
+  ...RequestInformationBlockFragment
+  ...StickySideBarBlockFragment
+  ...ProductDetailsAnchorTabsBlockFragment
+  ...ProductDetailsPageBlockFragment
+
+  ... on OptiFormsTextboxElement {
+    _metadata {
+      key
+      types
+    }
+    Label
+    Tooltip
+    Placeholder
+    AutoComplete
+    PredefinedValue
+    Validators
+  }
+
+  ... on OptiFormsTextareaElement {
+    _metadata {
+      key
+      types
+    }
+    Label
+    Tooltip
+    Placeholder
+    AutoComplete
+    PredefinedValue
+    Validators
+  }
+
+  ... on OptiFormsNumberElement {
+    _metadata {
+      key
+      types
+    }
+    Label
+    Tooltip
+    Placeholder
+    PredefinedValue
+    Validators
+  }
+
+  ... on OptiFormsSelectionElement {
+    _metadata {
+      key
+      types
+    }
+    Label
+    Tooltip
+    AutoComplete
+    Placeholder
+    Validators
+    Options
+  }
+
+  ... on OptiFormsChoiceElement {
+    _metadata {
+      key
+      types
+    }
+    Label
+    Tooltip
+    Options
+    AllowMultiSelect
+    Validators
+  }
+
+  ... on OptiFormsSubmitElement {
+    _metadata {
+      key
+      types
+    }
+    Label
+    Tooltip
+  }
+
+  ... on ParagraphElement {
+    _metadata {
+      key
+      types
+    }
+    Text {
+      html
+    }
+  }
+}

@@ -1,0 +1,14 @@
+query GetLocations {
+  Location {
+    items {
+      Name
+       _metadata {
+        key
+        displayName
+      }
+      ParentLocation {
+        key
+      }
+    }
+  }
+}

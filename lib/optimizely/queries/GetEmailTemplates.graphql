@@ -1,0 +1,48 @@
+query GetEmailTemplates($formName: String) {
+  CustomerEmailTemplateBlock(
+    where: {
+      _metadata: {
+        displayName: {
+          eq: $formName
+        }
+      }
+    }
+  ) {
+    items {
+      _metadata {
+        key
+        displayName
+      }
+      Subject
+      FromEmail
+      EmailBody {
+        html
+      }
+    }
+  }
+
+  StaffEmailTemplateBlock(
+    where: {
+      _metadata: {
+        displayName: {
+          eq: $formName
+        }
+      }
+    }
+  ) {
+    items {
+      _metadata {
+        key
+        displayName
+      }
+
+      Subject
+      FromEmail
+      ToEmail
+      CcEmail
+      EmailBody {
+        html
+      }
+    }
+  }
+}

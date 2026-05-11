@@ -1,0 +1,358 @@
+fragment MediaUrlFields on _IContent {
+  __typename
+  ... on ImageMedia {
+    _assetMetadata {
+      url
+    }
+  }
+  ... on GenericMedia {
+    _assetMetadata {
+      url
+    }
+  }
+}
+
+fragment EligibilitySummaryBlockFragment on EligibilitySummaryBlock {
+  Title
+  CheckIconSrc {
+    ...MediaUrlFields
+  }
+  Groups {
+    __typename
+    ... on EligibilitySummaryGroupBlock {
+      Subtitle
+      Items {
+        __typename
+        ... on EligibilitySummaryBulletBlock {
+          Id
+          Text
+        }
+      }
+    }
+  }
+}
+
+fragment ProductHighlightsBlockFragment on ProductHighlightsBlock {
+  Title
+  SpriteSrc {
+    ...MediaUrlFields
+  }
+  Tiles {
+    __typename
+    ... on ProductHighlightTileBlock {
+      Id
+      Row
+      IconPreset
+      Title
+      Description
+    }
+  }
+}
+
+fragment PersonalLoanCalculatorBlockFragment on PersonalLoanCalculatorBlock {
+  Title
+  Subtitle
+  AnnualInterestRate
+  IncomeMin
+  IncomeMax
+  LoanMin
+  LoanMax
+  InstallmentMinMonths
+  InstallmentMaxMonths
+  ValidationMessage
+  NoteLines {
+    html
+  }
+  RadioOffIconSrc {
+    ...MediaUrlFields
+  }
+  RadioOnIconSrc {
+    ...MediaUrlFields
+  }
+}
+
+fragment LoanInterestRatesTableRowBlockFragment on LoanInterestRatesTableRowBlock {
+  RowLabel
+  Cell1
+  Cell2
+  Cell3
+  Cell4
+  Cell5
+}
+
+fragment LoanInterestRatesSectionBlockFragment on LoanInterestRatesSectionBlock {
+  Title
+  Introduction
+  columnHeadersList: ColumnHeaders
+  Footnote
+  Rows {
+    __typename
+    ... on LoanInterestRatesTableRowBlock {
+      ...LoanInterestRatesTableRowBlockFragment
+    }
+  }
+}
+
+fragment LoanInterestGroupBlockFragment on LoanInterestGroupBlock {
+  Items {
+    __typename
+    ... on LoanInterestRatesSectionBlock {
+      ...LoanInterestRatesSectionBlockFragment
+    }
+    ... on LoanLimitGrantedSectionBlock {
+      ...LoanLimitGrantedSectionBlockFragment
+    }
+    ... on LoanCalculationExamplesSectionBlock {
+      ...LoanCalculationExamplesSectionBlockFragment
+    }
+    ... on LoanTermMediaGallerySectionBlock {
+      ...LoanTermMediaGallerySectionBlockFragment
+    }
+  }
+}
+
+fragment LoanLimitGrantedTableRowBlockFragment on LoanLimitGrantedTableRowBlock {
+  RowLabel
+  GovernmentCell {
+    html
+  }
+  PrivateCell {
+    html
+  }
+}
+
+fragment LoanLimitGrantedSectionBlockFragment on LoanLimitGrantedSectionBlock {
+  Title
+  columnHeadersText: ColumnHeaders
+  Rows {
+    __typename
+    ... on LoanLimitGrantedTableRowBlock {
+      ...LoanLimitGrantedTableRowBlockFragment
+    }
+  }
+}
+
+fragment LoanCalculationExamplesSectionBlockFragment on LoanCalculationExamplesSectionBlock {
+  AccordionTitle
+  Body {
+    html
+  }
+}
+
+fragment LoanTermGalleryItemFields on _IContent {
+  __typename
+  ... on LoanTermGalleryImageBlock {
+    Id
+    Alt
+    Image {
+      ...MediaUrlFields
+    }
+  }
+  ... on LoanTermGalleryYoutubeBlock {
+    Id
+    Alt
+    Url
+  }
+  ... on LoanTermGalleryVideoBlock {
+    Id
+    Alt
+    Poster {
+      ...MediaUrlFields
+    }
+    Video {
+      url {
+        default
+        base
+        hierarchical
+        internal
+      }
+      item {
+        __typename
+        ... on GenericMedia {
+          _assetMetadata {
+            url
+          }
+        }
+        ... on ImageMedia {
+          _assetMetadata {
+            url
+          }
+        }
+      }
+    }
+  }
+}
+
+fragment LoanTermMediaGallerySectionBlockFragment on LoanTermMediaGallerySectionBlock {
+  Title
+  Subtitle
+  ZoomLabel
+  Items {
+    ...LoanTermGalleryItemFields
+  }
+}
+
+fragment ProductDetailsConditionsBlockFragment on ProductDetailsConditionsBlock {
+  Title
+  DefaultOpen
+  Body {
+    html
+  }
+}
+
+fragment DownloadResourceBlockFragment on DownloadResourceBlock {
+  Id
+  Label
+  Extension
+  SizeLabel
+  SizeInMb
+  PublishedAt
+  Href {
+    text
+    title
+    target
+    url {
+      default
+      base
+      hierarchical
+      internal
+    }
+  }
+}
+
+fragment DownloadSectionBlockFragment on DownloadSectionBlock {
+  Title
+  SortLabel
+  Items {
+    __typename
+    ... on DownloadResourceBlock {
+      ...DownloadResourceBlockFragment
+    }
+  }
+}
+
+fragment ProductFaqItemBlockFragment on ProductFaqItemBlock {
+  Id
+  Question
+  Answer {
+    html
+  }
+}
+
+fragment ProductFaqBlockFragment on ProductFaqBlock {
+  Title
+  ShowMoreLabel
+  InitiallyVisibleCount
+  DefaultOpenId
+  Items {
+    __typename
+    ... on ProductFaqItemBlock {
+      ...ProductFaqItemBlockFragment
+    }
+  }
+}
+
+fragment RequestInformationBlockFragment on RequestInformationBlock {
+  Title
+  FormTitle
+  FormDescription {
+    html
+  }
+  SubmitLabel
+}
+
+fragment StickySideBarBlockFragment on StickySideBarBlock {
+  InterestLabel
+  InterestValue
+  InterestUnit
+  Footnote
+  PrimaryCtaLabel
+  PrimaryCtaUrl {
+    text
+    title
+    target
+    url {
+      default
+      base
+      hierarchical
+      internal
+    }
+  }
+  SecondaryCtaLabel
+  SecondaryCtaUrl {
+    text
+    title
+    target
+    url {
+      default
+      base
+      hierarchical
+      internal
+    }
+  }
+  TrustLabel
+  ComplianceLabel
+}
+
+fragment ProductDetailsAnchorTabsBlockFragment on ProductDetailsAnchorTabsBlock {
+  SectionId
+  Label
+}
+
+fragment ProductDetailsNestedColumnBlockFragment on _IContent {
+  __typename
+  ... on EligibilitySummaryBlock {
+    ...EligibilitySummaryBlockFragment
+  }
+  ... on ProductHighlightsBlock {
+    ...ProductHighlightsBlockFragment
+  }
+  ... on PersonalLoanCalculatorBlock {
+    ...PersonalLoanCalculatorBlockFragment
+  }
+  ... on LoanInterestRatesSectionBlock {
+    ...LoanInterestRatesSectionBlockFragment
+  }
+  ... on LoanLimitGrantedSectionBlock {
+    ...LoanLimitGrantedSectionBlockFragment
+  }
+  ... on LoanCalculationExamplesSectionBlock {
+    ...LoanCalculationExamplesSectionBlockFragment
+  }
+  ... on LoanTermMediaGallerySectionBlock {
+    ...LoanTermMediaGallerySectionBlockFragment
+  }
+  ... on LoanInterestGroupBlock {
+    ...LoanInterestGroupBlockFragment
+  }
+  ... on ProductDetailsConditionsBlock {
+    ...ProductDetailsConditionsBlockFragment
+  }
+  ... on DownloadSectionBlock {
+    ...DownloadSectionBlockFragment
+  }
+  ... on ProductFaqBlock {
+    ...ProductFaqBlockFragment
+  }
+  ... on RequestInformationBlock {
+    ...RequestInformationBlockFragment
+  }
+  ... on StickySideBarBlock {
+    ...StickySideBarBlockFragment
+  }
+}
+
+fragment ProductDetailsPageBlockFragment on ProductDetailsPageBlock {
+  AnchorTabItems {
+    __typename
+    ... on ProductDetailsAnchorTabsBlock {
+      ...ProductDetailsAnchorTabsBlockFragment
+    }
+  }
+  LeftContent {
+    ...ProductDetailsNestedColumnBlockFragment
+  }
+  RightContent {
+    ...ProductDetailsNestedColumnBlockFragment
+  }
+}

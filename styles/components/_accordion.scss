@@ -1,0 +1,104 @@
+.accordion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-6, 24px);
+}
+
+.accordion__item {
+  border: 0.5px solid var(--neutral-200, #d6d6d6);
+  border-radius: var(--radius-md, 12px);
+  background: var(--base-white, #ffffff);
+  overflow: hidden;
+}
+
+.accordion__summary {
+  appearance: none;
+  border: 0;
+  background: var(--base-white, #ffffff);
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-3, 12px);
+  width: 100%;
+  padding: var(--spacing-4, 16px) var(--spacing-5, 20px);
+  cursor: pointer;
+  text-align: left;
+}
+
+.accordion__summary::-webkit-details-marker {
+  display: none;
+}
+
+.accordion__title {
+  flex: 1 0 0;
+  min-width: 0;
+  color: var(--base-black, #002533);
+  font-family: var(--font-prompt);
+  font-size: var(--type-body-base-mobile, 1rem);
+  font-weight: 500;
+  line-height: 1.6;
+}
+
+.accordion__icon {
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--base-black, #002533);
+  transition: transform 160ms ease;
+}
+
+.accordion__icon > .inline-flex {
+  width: 100%;
+  height: 100%;
+}
+
+.accordion__icon img,
+.accordion__icon svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.accordion__item.is-open .accordion__icon {
+  transform: rotate(180deg);
+}
+
+.accordion__panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  overflow: hidden;
+  opacity: 0;
+  transition: grid-template-rows 240ms ease, opacity 180ms ease;
+}
+
+.accordion__item.is-open .accordion__panel {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.accordion__content {
+  min-height: 0;
+  overflow: hidden;
+  padding: 0 var(--spacing-5, 20px);
+  color: var(--neutral-400, #5c5b57);
+  font-family: var(--font-prompt);
+  font-size: var(--type-body-base-mobile, 1rem);
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+.accordion__item.is-open .accordion__content {
+  padding-bottom: var(--spacing-4, 16px);
+}
+
+.accordion__content p {
+  margin: 0;
+}
+
+.accordion__content p + p {
+  margin-top: var(--spacing-6, 24px);
+}
+

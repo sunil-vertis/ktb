@@ -1,0 +1,22 @@
+@mixin mobile-up($min-width) {
+  @media (min-width: $min-width) {
+    @content;
+  }
+}
+
+@mixin font-primary {
+  font-family: var(--font-prompt);
+}
+
+@mixin focus-ring {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+@mixin section-spacing {
+  padding-block: var(--spacing-12, 48px);
+
+  @include mobile-up(768px) {
+    padding-block: var(--spacing-15, 60px);
+  }
+}

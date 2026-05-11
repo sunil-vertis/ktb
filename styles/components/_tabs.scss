@@ -1,0 +1,94 @@
+.tabs {
+  width: 100%;
+}
+
+/* Background lives here: no overflow, so the strip can span the viewport. */
+.tabs__list-bleed {
+  width: 100%;
+  background: var(--neutral-050, #f7f7f7);
+}
+
+.tabs__list {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4, 16px);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  touch-action: pan-x;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  cursor: grab;
+  user-select: none;
+}
+
+
+.tabs__list:active {
+  cursor: grabbing;
+}
+
+.tabs__list::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.tabs__item {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-6, 24px) var(--spacing-2, 8px);
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--neutral-400, #5c5b57);
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: var(--font-prompt);
+  font-size: var(--type-body-base-mobile, 1rem);
+  font-weight: 500;
+  line-height: 1.6;
+  transition: color 140ms ease, background-color 140ms ease, border-color 140ms ease;
+}
+
+a.tabs__item {
+  text-decoration: none;
+}
+
+.tabs__item:hover {
+  background: var(--neutral-100, #e9e9e9);
+}
+
+.tabs__item.is-selected {
+  color: var(--brand-secondary, #185fa5);
+  border-bottom-color: var(--brand-secondary, #185fa5);
+}
+
+.tabs__item:focus-visible {
+  outline: 2px solid var(--brand-primary, #00a8e9);
+  outline-offset: -2px;
+}
+
+.tabs__item:disabled,
+.tabs__item[aria-disabled="true"] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+a.tabs__item[aria-disabled="true"] {
+  pointer-events: none;
+}
+
+.tabs__panel {
+  padding-block: var(--spacing-5, 20px);
+  padding-inline: var(--spacing-5, 20px);
+  color: var(--neutral-700, #2b2a28);
+  font-family: var(--font-prompt);
+  font-size: var(--type-body-base-mobile, 1rem);
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+.tabs__panel[hidden] {
+  display: none;
+}

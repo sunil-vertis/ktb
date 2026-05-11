@@ -1,0 +1,14 @@
+/* Tab strip spacing matches Figma 538:10484 (gap 24px between labels). */
+
+.section {
+  width: 100%;
+}
+
+.tabsList {
+  gap: var(--spacing-6, 1.5rem);
+}
+
+.tabPanel {
+  padding: 0;
+  background: transparent;
+}

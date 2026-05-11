@@ -1,0 +1,147 @@
+query GetVisualBuilderBySlug($locales: [Locales], $slug: String) {
+  SEOExperience(
+    locale: $locales
+    where: { _metadata: { url: { default: { eq: $slug } } } }
+  ) {
+    item {
+      title
+      shortDescription
+      keywords
+      composition {
+        nodes {
+          nodeType
+          key
+          type
+          displayName
+          displaySettings {
+            value
+            key
+          }
+          ... on CompositionComponentNode {
+            component {
+              __typename
+              ...ItemsInContentArea
+            }
+          }
+          ... on CompositionStructureNode {
+            key
+            type
+            displayName
+            rows: nodes {
+              ... on CompositionStructureNode {
+                key
+                type
+                displayName
+                columns: nodes {
+                  ... on CompositionStructureNode {
+                    key
+                    type
+                    displayName
+                    elements: nodes {
+                      nodeType
+                      key
+                      type
+                      displayName
+                      displaySettings {
+                        value
+                        key
+                      }
+                      ... on CompositionComponentNode {
+                        component {
+                          __typename
+                          ...ItemsInContentArea
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  BlankExperience(
+    locale: $locales
+    where: { _metadata: { url: { default: { eq: $slug } } } }
+  ) {
+    item {
+      composition {
+        nodes {
+          nodeType
+          key
+          type
+          displayName
+          displaySettings {
+            value
+            key
+          }
+          ... on CompositionComponentNode {
+            component {
+              __typename
+              ...ItemsInContentArea
+            }
+          }
+          ... on CompositionStructureNode {
+            key
+            type
+            displayName
+            rows: nodes {
+              ... on CompositionStructureNode {
+                key
+                type
+                displayName
+                columns: nodes {
+                  ... on CompositionStructureNode {
+                    key
+                    type
+                    displayName
+                    elements: nodes {
+                      nodeType
+                      key
+                      type
+                      displayName
+                      displaySettings {
+                        value
+                        key
+                      }
+
+                      ... on CompositionComponentNode {
+                        component {
+                          __typename
+                          ...ItemsInContentArea
+                        }
+                      }
+
+                      ... on CompositionStructureNode {
+                        elements: nodes {
+                          nodeType
+                          key
+                          type
+                          displayName
+                          displaySettings {
+                            value
+                            key
+                          }
+
+                          ... on CompositionComponentNode {
+                            component {
+                              __typename
+                              ...ItemsInContentArea
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

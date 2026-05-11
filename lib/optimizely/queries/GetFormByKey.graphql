@@ -1,0 +1,20 @@
+query GetFormByKey($displayName: String) {
+  OptiFormsContainerData(
+    where: { _metadata: { displayName: { eq: $displayName } } }
+  ) {
+    items {
+      _metadata {
+        key
+        displayName
+      }
+      Title
+      Description
+      SubmitConfirmationMessage
+      ResetConfirmationMessage
+      ShowSummaryMessageAfterSubmission
+      SubmitUrl {
+        default
+      }
+    }
+  }
+}

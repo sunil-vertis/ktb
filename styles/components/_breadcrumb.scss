@@ -1,0 +1,68 @@
+/* Breadcrumb — KTB POC (Figma: Body/Small Regular, Prompt) */
+.breadcrumb {
+  width: 100%;
+  background: var(--base-white, #ffffff);
+  border-top: 1px solid var(--neutral-100, #e9e9e9);
+  border-bottom: 1px solid var(--neutral-100, #e9e9e9);
+}
+
+.breadcrumb__inner {
+  /* Mobile-first padding; matches Figma px-5 py-2 */
+  padding: var(--spacing-2, 8px) var(--spacing-5, 20px);
+}
+
+.breadcrumb__list {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: var(--spacing-2, 8px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.breadcrumb__list::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.breadcrumb__item {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: var(--spacing-2, 8px);
+}
+
+.breadcrumb__item + .breadcrumb__item::before {
+  content: "›";
+  color: var(--neutral-400, #5c5b57);
+}
+
+.breadcrumb__link {
+  color: var(--neutral-400, #5c5b57);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 140ms ease;
+}
+
+.breadcrumb__link:hover {
+  color: var(--neutral-500, #424242);
+}
+
+.breadcrumb__link:focus-visible {
+  outline: 2px solid var(--brand-primary, #00a8e9);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm, 4px);
+}
+
+.breadcrumb__current {
+  color: var(--brand-secondary, #185fa5);
+  white-space: nowrap;
+}

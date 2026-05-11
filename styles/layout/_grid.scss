@@ -1,0 +1,9 @@
+.layout-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-4, 16px);
+
+  @media (min-width: 768px) {
+    gap: var(--spacing-6, 24px);
+  }
+}

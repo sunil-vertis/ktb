@@ -1,0 +1,199 @@
+/* Pagination — Figma node 208:4703 (KTB-POC-Design) */
+
+.pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-4, 16px);
+  width: 100%;
+
+  @media (max-width: 1023px) {
+    justify-content: center;
+  }
+}
+
+.pagination__summary {
+  margin: 0;
+  font-family: var(--font-prompt);
+  font-size: var(--type-body-base-mobile, 1rem);
+  font-weight: 400;
+  line-height: 1.6;
+  color: var(--base-black, #002533);
+  white-space: nowrap;
+}
+
+.pagination__nav {
+  flex-shrink: 0;
+}
+
+.pagination__shell {
+  display: inline-flex;
+  max-width: 100%;
+  border: 1px solid var(--neutral-100, #e9e9e9);
+  border-radius: 14px;
+  background: var(--base-white, #ffffff);
+  overflow: hidden;
+}
+
+.pagination__rail {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pagination__segment {
+  display: flex;
+  align-items: stretch;
+  flex-shrink: 0;
+  background: var(--base-white, #ffffff);
+}
+
+.pagination__segment:not(:last-child) {
+  border-right: 0.5px solid var(--neutral-100, #e9e9e9);
+}
+
+.pagination__segment--prev .pagination__edge-btn,
+.pagination__segment--next .pagination__edge-btn {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-1, 4px);
+  min-height: 48px;
+  padding: var(--spacing-2, 8px) var(--spacing-4, 16px);
+  border: 0;
+  background: transparent;
+  font-family: var(--font-prompt);
+  font-size: var(--type-body-base-mobile, 1rem);
+  font-weight: 400;
+  line-height: 1.6;
+  cursor: pointer;
+  color: var(--brand-secondary, #185fa5);
+  transition: color 140ms ease, opacity 140ms ease;
+}
+
+.pagination__segment--prev .pagination__edge-btn {
+  padding-inline: var(--spacing-2, 8px) var(--spacing-4, 16px);
+}
+
+.pagination__segment--next .pagination__edge-btn {
+  padding-inline: var(--spacing-4, 16px) var(--spacing-2, 8px);
+}
+
+.pagination__segment--prev.is-disabled .pagination__edge-btn,
+.pagination__segment--next.is-disabled .pagination__edge-btn {
+  color: var(--neutral-300, #969696);
+  cursor: not-allowed;
+}
+
+.pagination__segment--prev:not(.is-disabled) .pagination__edge-btn:hover,
+.pagination__segment--next:not(.is-disabled) .pagination__edge-btn:hover {
+  color: var(--brand-secondary, #185fa5);
+}
+
+.pagination__segment--prev.is-disabled .pagination__edge-btn:disabled,
+.pagination__segment--next.is-disabled .pagination__edge-btn:disabled {
+  opacity: 1;
+}
+
+.pagination__edge-btn:focus-visible {
+  outline: 2px solid var(--brand-primary, #00a8e9);
+  outline-offset: -2px;
+  z-index: 1;
+}
+
+.pagination__chevron {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+}
+
+.pagination__chevron--prev {
+  transform: rotate(180deg);
+}
+
+.pagination__edge-label {
+  white-space: nowrap;
+}
+
+@media (max-width: 1023px) {
+  .pagination__edge-label {
+    display: none;
+  }
+
+  .pagination__segment--prev .pagination__edge-btn,
+  .pagination__segment--next .pagination__edge-btn {
+    padding-inline: var(--spacing-2, 8px);
+    min-width: 48px;
+  }
+}
+
+.pagination__segment--page {
+  min-width: 48px;
+  min-height: 48px;
+}
+
+.pagination__segment--page.is-active {
+  background: var(--brand-primary, #00a8e9);
+}
+
+.pagination__page-btn {
+  box-sizing: border-box;
+  display: flex;
+  width: 100%;
+  min-width: 48px;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-2, 8px) var(--spacing-4, 16px);
+  border: 0;
+  background: transparent;
+  font-family: var(--font-prompt);
+  font-size: var(--type-body-base-mobile, 1rem);
+  font-weight: 400;
+  line-height: 1.6;
+  color: var(--brand-secondary, #185fa5);
+  cursor: pointer;
+  transition: color 140ms ease;
+}
+
+.pagination__segment--page.is-active .pagination__page-btn {
+  color: var(--base-white, #ffffff);
+}
+
+.pagination__segment--page:not(.is-active) .pagination__page-btn:hover:not(:disabled) {
+  color: var(--brand-secondary, #185fa5);
+}
+
+.pagination__page-btn:disabled {
+  cursor: default;
+}
+
+.pagination__page-btn:focus-visible {
+  outline: 2px solid var(--brand-primary, #00a8e9);
+  outline-offset: -2px;
+  z-index: 1;
+}
+
+.pagination__segment--ellipsis {
+  align-items: center;
+  justify-content: center;
+  min-width: 48px;
+  min-height: 48px;
+  padding-inline: var(--spacing-4, 16px);
+}
+
+.pagination__ellipsis {
+  font-family: var(--font-prompt);
+  font-size: var(--type-body-base-mobile, 1rem);
+  font-weight: 400;
+  line-height: 1.6;
+  color: var(--brand-secondary, #185fa5);
+  letter-spacing: 0.02em;
+  user-select: none;
+}

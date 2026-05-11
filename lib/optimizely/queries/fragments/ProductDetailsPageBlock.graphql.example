@@ -1,0 +1,5 @@
+# ProductDetailsPageBlock GraphQL lives in ProductDetailsBlocks.graphql
+# (`ProductDetailsNestedColumnBlockFragment` + `ProductDetailsPageBlockFragment`)
+# and is spread from `ItemsInContentArea` in Block.graphql.
+#
+# After CMS model changes, run: npm run gen-types

@@ -1,0 +1,10 @@
+query GetForms {
+  OptiFormsContainerData {
+    items {
+      _metadata {
+        key
+        displayName
+      }
+    }
+  }
+}

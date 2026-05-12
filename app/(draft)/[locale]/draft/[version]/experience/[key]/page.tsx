@@ -23,7 +23,7 @@ export default async function Page(props: {
 
   const experienceData = await optimizely.VisualBuilder(
     { key, version, locales },
-    { preview: true }
+    { preview: true, useDraftGraphSessionCookie: true }
   )
   const experience = experienceData.data?.SEOExperience?.item as
     | SafeVisualBuilderExperience

@@ -21,7 +21,7 @@ export default async function HomePage(props: {
   const locales = getValidLocale(locale)
   const pageResponse = await optimizely.GetPreviewStartPage(
     { locales, version },
-    { preview: true }
+    { preview: true, useDraftGraphSessionCookie: true }
   )
   const startPage = pageResponse.data?.StartPage?.item
   const blocks = (startPage?.blocks ?? []).filter(

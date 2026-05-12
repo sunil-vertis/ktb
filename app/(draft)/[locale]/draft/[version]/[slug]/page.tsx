@@ -23,7 +23,7 @@ export default async function CmsPage(props: {
 
   const pageResponse = await optimizely.getPreviewPageByURL(
     { locales, slug: formattedSlug, version },
-    { preview: true }
+    { preview: true, useDraftGraphSessionCookie: true }
   )
   const page = pageResponse.data?.CMSPage?.item
 

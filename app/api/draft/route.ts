@@ -1,11 +1,17 @@
-import { draftMode } from 'next/headers'
+import { cookies, draftMode } from 'next/headers'
 import { notFound, redirect } from 'next/navigation'
 import { NextRequest, NextResponse } from 'next/server'
 
-import { optimizely } from '@/lib/optimizely/fetch'
+import { OPTIMIZELY_PREVIEW_JWT_COOKIE, optimizely } from '@/lib/optimizely/fetch'
+import { DEFAULT_LOCALE, getValidLocale } from '@/lib/optimizely/utils/language'
+
+export const dynamic = 'force-dynamic'
+
+const graphPreviewFromToken = (previewJwt: string) =>
+  ({ preview: true, previewJwt }) as const
 
 export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url)
+  const searchParams = request.nextUrl.searchParams
   const token = searchParams.get('preview_token')
   const key = searchParams.get('key')
   const ver = searchParams.get('ver')
@@ -15,12 +21,23 @@ export async function GET(request: NextRequest) {
     return notFound()
   }
 
+  const cookieStore = await cookies()
+  cookieStore.set(OPTIMIZELY_PREVIEW_JWT_COOKIE, token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+    maxAge: 1800,
+  })
+
+  const graphOpts = graphPreviewFromToken(token)
+
   const response = await optimizely.GetContentByKeyAndVersion(
     { key, ver },
-    { preview: true }
+    graphOpts
   )
 
-  if (response.errors) {
+  if (Array.isArray(response.errors) && response.errors.length > 0) {
     const errorsMessage = response.errors
       .map((error) => error.message)
       .join(', ')
@@ -28,30 +45,57 @@ export async function GET(request: NextRequest) {
     return new NextResponse(errorsMessage, { status: 401 })
   }
 
-  const content = response.data?._Content?.item
+  let content = response.data?._Content?.item
+
   if (!content) {
+    const localeSeg = loc ?? DEFAULT_LOCALE
+    const vbResponse = await optimizely.VisualBuilder(
+      {
+        key,
+        version: ver,
+        locales: [getValidLocale(localeSeg)],
+      },
+      graphOpts
+    )
+
+    if (Array.isArray(vbResponse.errors) && vbResponse.errors.length > 0) {
+      const errorsMessage = vbResponse.errors
+        .map((error) => error.message)
+        .join(', ')
+
+      return new NextResponse(errorsMessage, { status: 401 })
+    }
+
+    if (vbResponse.data?.SEOExperience?.item) {
+      ;(await draftMode()).enable()
+      redirect(`/${localeSeg}/draft/${ver}/experience/${key}`)
+    }
+
     return new NextResponse('Bad Request', { status: 400 })
   }
+
+  const localeSeg = loc ?? DEFAULT_LOCALE
+
   ;(await draftMode()).enable()
   let newUrl = ''
-  if (content.__typename === '_Experience') {
-    newUrl = `/${loc}/draft/${ver}/experience/${key}`
+  if (
+    content.__typename === '_Experience' ||
+    content.__typename === 'SEOExperience'
+  ) {
+    newUrl = `/${localeSeg}/draft/${ver}/experience/${key}`
   } else if (content.__typename === '_Component') {
-    newUrl = `/${loc}/draft/${ver}/block/${key}`
+    newUrl = `/${localeSeg}/draft/${ver}/block/${key}`
   } else {
-    // In hierarchical routing, the Start Page in Optimizely does not use "/" as its URL
-    // but instead has a path like "/start-page". To normalize the URL and make it relative
-    // to the Start Page, we remove the OPTIMIZELY_START_PAGE_URL prefix from the hierarchical URL.
     const hierarchicalUrl = content?._metadata?.url?.hierarchical?.replace(
       process.env.OPTIMIZELY_START_PAGE_URL ?? '',
       ''
     )
 
     const hierarchicalUrlWithoutLocale = hierarchicalUrl?.replace(
-      `/${loc}/`,
+      `/${localeSeg}/`,
       ''
     )
-    newUrl = `/${loc}/draft/${ver}/${hierarchicalUrlWithoutLocale}`
+    newUrl = `/${localeSeg}/draft/${ver}/${hierarchicalUrlWithoutLocale}`
   }
 
   redirect(`${newUrl}`)

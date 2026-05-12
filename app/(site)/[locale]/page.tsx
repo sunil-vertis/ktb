@@ -1,11 +1,8 @@
 import ContentAreaMapper from '@/components/content-area/mapper'
-import DraftModeHomePage from '@/components/draft/draft-mode-homepage'
-import { DraftModeLoader } from '@/components/draft/draft-mode-loader'
 import { optimizely } from '@/lib/optimizely/fetch'
 import { getValidLocale } from '@/lib/optimizely/utils/language'
 import { generateAlternates } from '@/lib/utils/metadata'
 import { Metadata } from 'next'
-import { draftMode } from 'next/headers'
 import { Suspense } from 'react'
 
 export async function generateMetadata(props: {
@@ -35,15 +32,6 @@ export default async function HomePage(props: {
 }) {
   const { locale } = await props.params
   const locales = getValidLocale(locale)
-  const { isEnabled: isDraftModeEnabled } = await draftMode()
-  if (isDraftModeEnabled) {
-    return (
-      <Suspense fallback={<DraftModeLoader />}>
-        <DraftModeHomePage locales={locales} />
-      </Suspense>
-    )
-  }
-
   const pageResponse = await optimizely.GetStartPage({ locales: [locales] })
   if (process.env.NODE_ENV === 'development' && pageResponse.errors?.length) {
     console.error('[GetStartPage] GraphQL errors', { locale, errors: pageResponse.errors })

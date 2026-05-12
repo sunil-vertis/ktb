@@ -1,7 +1,7 @@
 .registration-block {
   background: var(--neutral-050, #f7f7f7);
   padding: var(--spacing-10, 2.5rem) var(--spacing-5, 1.25rem);
-  
+
   &__container {
     margin: 0 auto;
     width: 100%;
@@ -45,7 +45,9 @@
     margin-inline-end: 0.625rem;
 
     @media (max-width: 1023px) {
-      &:has(+ .registration-block__step-label + .registration-block__step-line) {
+      &:has(
+          + .registration-block__step-label + .registration-block__step-line
+        ) {
         margin-inline-end: var(--spacing-6, 1.5rem);
       }
     }
@@ -127,7 +129,9 @@
     margin: 0;
     color: var(--neutral-400, #5c5b57);
     font-family: var(--font-prompt);
-    font-size: calc(var(--type-body-small-mobile, 0.875rem) * var(--font-scale-factor, 1));
+    font-size: calc(
+      var(--type-body-small-mobile, 0.875rem) * var(--font-scale-factor, 1)
+    );
     font-style: normal;
     font-weight: 400;
     line-height: 1.5;
@@ -158,7 +162,9 @@
   &__label {
     color: var(--neutral-400, #5c5b57);
     font-family: var(--font-prompt);
-    font-size: calc(var(--type-label-default-mobile, 0.875rem) * var(--font-scale-factor, 1));
+    font-size: calc(
+      var(--type-label-default-mobile, 0.875rem) * var(--font-scale-factor, 1)
+    );
     font-style: normal;
     font-weight: 500;
     line-height: 1.4;
@@ -172,7 +178,9 @@
     padding: var(--spacing-3, 0.75rem) var(--spacing-4, 1rem);
     color: var(--base-black, #002533);
     font-family: var(--font-prompt);
-    font-size: calc(var(--type-body-base-mobile, 1rem) * var(--font-scale-factor, 1));
+    font-size: calc(
+      var(--type-body-base-mobile, 1rem) * var(--font-scale-factor, 1)
+    );
     font-style: normal;
     font-weight: 400;
     line-height: 1.6;
@@ -201,7 +209,9 @@
     margin: 0;
     color: var(--neutral-400, #5c5b57);
     font-family: var(--font-prompt);
-    font-size: calc(var(--type-body-small-mobile, 0.875rem) * var(--font-scale-factor, 1));
+    font-size: calc(
+      var(--type-body-small-mobile, 0.875rem) * var(--font-scale-factor, 1)
+    );
     font-style: normal;
     font-weight: 400;
     line-height: 1.5;
@@ -263,7 +273,9 @@
   &__radio-label {
     color: var(--brand-tertiary-1, #044062);
     font-family: var(--font-prompt);
-    font-size: calc(var(--type-body-large-mobile, 1rem) * var(--font-scale-factor, 1));
+    font-size: calc(
+      var(--type-body-large-mobile, 1rem) * var(--font-scale-factor, 1)
+    );
     font-style: normal;
     font-weight: 500;
     line-height: 1.6;
@@ -283,7 +295,9 @@
     padding: var(--spacing-3, 0.75rem) 2.75rem var(--spacing-3, 0.75rem)
       var(--spacing-4, 1rem);
     font-family: var(--font-prompt);
-    font-size: calc(var(--type-body-base-mobile, 1rem) * var(--font-scale-factor, 1));
+    font-size: calc(
+      var(--type-body-base-mobile, 1rem) * var(--font-scale-factor, 1)
+    );
     font-style: normal;
     font-weight: 400;
     line-height: 1.6;
@@ -383,7 +397,9 @@
     margin: 0;
     color: var(--neutral-400, #5c5b57);
     font-family: var(--font-prompt);
-    font-size: calc(var(--type-body-small-mobile, 0.875rem) * var(--font-scale-factor, 1));
+    font-size: calc(
+      var(--type-body-small-mobile, 0.875rem) * var(--font-scale-factor, 1)
+    );
     font-style: normal;
     font-weight: 400;
     line-height: 1.5;
@@ -394,7 +410,9 @@
     margin: 0;
     color: var(--base-black, #002533);
     font-family: var(--font-prompt);
-    font-size: calc(var(--type-body-small-mobile, 0.875rem) * var(--font-scale-factor, 1));
+    font-size: calc(
+      var(--type-body-small-mobile, 0.875rem) * var(--font-scale-factor, 1)
+    );
     font-style: normal;
     font-weight: 500;
     line-height: 1.6;
@@ -450,7 +468,9 @@
     margin: 0;
     color: var(--base-black, #002533);
     font-family: var(--font-prompt);
-    font-size: calc(var(--type-body-base-mobile, 1rem) * var(--font-scale-factor, 1));
+    font-size: calc(
+      var(--type-body-base-mobile, 1rem) * var(--font-scale-factor, 1)
+    );
     font-style: normal;
     font-weight: 400;
     line-height: 1.6;
@@ -485,9 +505,12 @@
 @media (min-width: 1024px) {
   .registration-block {
     padding: var(--spacing-15, 3.75rem) 0 var(--spacing-20, 5rem);
+    height: 100vh;
 
     &__container {
       gap: var(--spacing-10, 2.5rem);
+      height: 100%;
+      justify-content: center;
     }
 
     &__step-label {
@@ -495,7 +518,9 @@
       margin-left: 0;
       color: var(--neutral-300, #969696);
       font-family: var(--font-prompt);
-      font-size: calc(var(--type-body-small-mobile, 0.875rem) * var(--font-scale-factor, 1));
+      font-size: calc(
+        var(--type-body-small-mobile, 0.875rem) * var(--font-scale-factor, 1)
+      );
       font-style: normal;
       font-weight: 500;
       line-height: 1.6;

@@ -22,10 +22,13 @@ export default async function RootLayout({
 }>) {
   const { locale } = await params
   return (
-    <html lang={locale} suppressHydrationWarning>
-      <body className="antialiased" suppressHydrationWarning>
+    <html lang={locale} className="h-full" suppressHydrationWarning>
+      <body
+        className="flex min-h-screen flex-col antialiased"
+        suppressHydrationWarning
+      >
         <Header locale={locale} />
-        <main className="h-full">{children}</main>
+        <main className="min-h-0 flex-1">{children}</main>
         <Footer />
       </body>
     </html>

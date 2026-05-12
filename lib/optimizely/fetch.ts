@@ -3,10 +3,23 @@ import { print } from 'graphql/language/printer'
 import { getSdk } from './types/generated'
 import { isVercelError } from '../type-guards'
 
+/**
+ * HttpOnly cookie set by `/api/draft`. Read only when `useDraftGraphSessionCookie` is true
+ * (never from `(site)` routes) so live browsing stays on published Graph.
+ */
+export const OPTIMIZELY_PREVIEW_JWT_COOKIE = 'odg_preview_jwt'
+
 interface OptimizelyFetchOptions {
   headers?: Record<string, string>
   cache?: RequestCache
   preview?: boolean
+  /** Bearer token from CMS `preview_token` (e.g. passed straight through in `/api/draft`). */
+  previewJwt?: string | null
+  /**
+   * When true with `preview`, read `OPTIMIZELY_PREVIEW_JWT_COOKIE` and send `Authorization: Bearer`.
+   * Use only from `app/(draft)/...` after `/api/draft` has set the cookie.
+   */
+  useDraftGraphSessionCookie?: boolean
   cacheTag?: string
 }
 
@@ -36,6 +49,8 @@ const optimizelyFetch = async <Response, Variables = object>({
   headers,
   cache,
   preview,
+  previewJwt,
+  useDraftGraphSessionCookie,
   cacheTag,
 }: OptimizelyFetch<Variables>): Promise<
   GraphqlResponse<Response> & { headers: Headers }
@@ -44,7 +59,23 @@ const optimizelyFetch = async <Response, Variables = object>({
   let resolvedCache: RequestCache | undefined = cache
 
   if (preview) {
-    configHeaders.Authorization = `Basic ${process.env.OPTIMIZELY_PREVIEW_SECRET}`
+    let bearerJwt =
+      typeof previewJwt === 'string' ? previewJwt.trim() : ''
+    if (!bearerJwt && useDraftGraphSessionCookie) {
+      try {
+        const { cookies } = await import('next/headers')
+        const store = await cookies()
+        bearerJwt =
+          store.get(OPTIMIZELY_PREVIEW_JWT_COOKIE)?.value?.trim() ?? ''
+      } catch {
+        /* cookies() unavailable outside a request */
+      }
+    }
+    if (bearerJwt) {
+      configHeaders.Authorization = `Bearer ${bearerJwt}`
+    } else if (process.env.OPTIMIZELY_PREVIEW_SECRET?.trim()) {
+      configHeaders.Authorization = `Basic ${process.env.OPTIMIZELY_PREVIEW_SECRET}`
+    }
     resolvedCache = 'no-store'
   }
 

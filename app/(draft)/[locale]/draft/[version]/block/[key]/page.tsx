@@ -22,7 +22,7 @@ export default async function Page(props: {
 
   const componentData = await optimizely.GetComponentByKey(
     { locales, key, version },
-    { preview: true }
+    { preview: true, useDraftGraphSessionCookie: true }
   )
 
   const blocks = componentData.data?._Component?.item

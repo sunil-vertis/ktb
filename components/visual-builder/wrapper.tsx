@@ -29,8 +29,8 @@ export default async function VisualBuilderExperienceWrapper({
   const formSettings = await getFormSettings(nodes)
   
   return (
-    <div className="vb:outline relative w-full flex-1">
-      <div className="vb:outline relative w-full flex-1">
+    <div className="vb:outline relative w-full flex-1 h-full">
+      <div className="vb:outline relative w-full flex-1 h-full">
         {nodes.map((node: VisualBuilderNode) => {
           if (node.nodeType === 'section') {
             return (

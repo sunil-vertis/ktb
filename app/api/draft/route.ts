@@ -22,10 +22,13 @@ export async function GET(request: NextRequest) {
   }
 
   const cookieStore = await cookies()
+  const isSecureDeployment =
+    process.env.NODE_ENV === 'production' || process.env.VERCEL === '1'
   cookieStore.set(OPTIMIZELY_PREVIEW_JWT_COOKIE, token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    /** Required when CMS loads preview in an iframe (cross-site ancestor). */
+    secure: isSecureDeployment,
+    sameSite: isSecureDeployment ? 'none' : 'lax',
     path: '/',
     maxAge: 1800,
   })

@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { Fragment, useMemo, useState, type FormEvent } from 'react'
+import { Fragment, useEffect, useMemo, useState, type FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
 
 import { Tabs } from '@/components/ui/tabs'
@@ -14,7 +14,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { searchResults, type SearchResultKind } from '@/lib/data/search-results'
+import {
+  searchResults,
+  type SearchResultKind,
+  type SearchResultRow,
+} from '@/lib/data/search-results'
 
 import styles from '@/styles/components/search-results-block.module.scss'
 
@@ -33,6 +37,18 @@ const TOPICS = [
 export type SearchResultsBlockProps = {
   locale: string
   query: string
+  /** Server-rendered Optimizely SearchContent hits (replaces mock when provided). */
+  initialRows?: SearchResultRow[]
+  /** ProductPage-only hits for the Page tab (`SearchContentProductPages`). */
+  initialPageRows?: SearchResultRow[]
+  /** Total hits from `Searchable.total` when using CMS search + pagination. */
+  searchTotal?: number
+  /** Total ProductPage hits for the Page tab. */
+  searchPageTabTotal?: number
+  /** Current 1-based page from `?page=` when using CMS search. */
+  searchPage?: number
+  /** Must match GraphQL `limit` (default 10). */
+  searchPageSize?: number
 }
 
 function formatKind(kind: SearchResultKind): string {
@@ -73,16 +89,46 @@ function FilterTopicIcon() {
   )
 }
 
-export function SearchResultsBlock({ locale, query }: SearchResultsBlockProps) {
+export function SearchResultsBlock({
+  locale,
+  query,
+  initialRows,
+  initialPageRows,
+  searchTotal,
+  searchPageTabTotal,
+  searchPage,
+  searchPageSize,
+}: SearchResultsBlockProps) {
   const router = useRouter()
   const [searchText, setSearchText] = useState(query)
+
+  useEffect(() => {
+    setSearchText(query)
+  }, [query])
+
   const [activeTab, setActiveTab] = useState<TabId>('all')
   const [sort, setSort] = useState<SortMode>('relevance')
   const [page, setPage] = useState(1)
   const [activeTopics, setActiveTopics] = useState<string[]>([])
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false)
 
-  const all = useMemo(() => searchResults(query), [query])
+  const serverPaged =
+    initialRows !== undefined &&
+    searchTotal !== undefined &&
+    searchPage !== undefined &&
+    searchPageSize !== undefined
+
+  const goToSearchPage = (p: number) => {
+    const params = new URLSearchParams()
+    params.set('q', query)
+    if (p > 1) params.set('page', String(p))
+    router.push(`/${locale}/search?${params.toString()}`)
+  }
+
+  const all = useMemo(() => {
+    if (initialRows !== undefined) return initialRows
+    return searchResults(query)
+  }, [initialRows, query])
 
   const pages = useMemo(() => all.filter((r) => r.kind === 'page'), [all])
   const documents = useMemo(
@@ -92,11 +138,26 @@ export function SearchResultsBlock({ locale, query }: SearchResultsBlockProps) {
   const assets = useMemo(() => all.filter((r) => r.kind === 'asset'), [all])
 
   const resolvedTabResults = useMemo(() => {
+    if (
+      activeTab === 'pages' &&
+      serverPaged &&
+      initialPageRows !== undefined
+    ) {
+      return initialPageRows
+    }
     if (activeTab === 'pages') return pages
     if (activeTab === 'documents') return documents
     if (activeTab === 'assets') return assets
     return all
-  }, [activeTab, all, pages, documents, assets])
+  }, [
+    activeTab,
+    serverPaged,
+    initialPageRows,
+    all,
+    pages,
+    documents,
+    assets,
+  ])
 
   const filtered = useMemo(() => {
     if (activeTopics.length === 0) return resolvedTabResults
@@ -145,31 +206,68 @@ export function SearchResultsBlock({ locale, query }: SearchResultsBlockProps) {
     return copy
   }, [resolvedSort, filtered, activeTab])
 
-  const pageSize = 10
-  const totalItems = sorted.length
+  const pageSize = searchPageSize ?? 10
+  const totalItems = useMemo(() => {
+    if (!serverPaged) return sorted.length
+    if (activeTab === 'pages') return searchPageTabTotal ?? 0
+    return searchTotal ?? 0
+  }, [
+    serverPaged,
+    activeTab,
+    searchPageTabTotal,
+    searchTotal,
+    sorted.length,
+  ])
   const totalPages = Math.max(1, Math.ceil(totalItems / pageSize))
-  const currentPage = Math.min(Math.max(1, page), totalPages)
+  const currentPage = serverPaged
+    ? searchPage
+    : Math.min(Math.max(1, page), totalPages)
 
   const pageItems = useMemo(() => {
+    if (serverPaged) return sorted
     const start = (currentPage - 1) * pageSize
     return sorted.slice(start, start + pageSize)
-  }, [currentPage, sorted])
+  }, [serverPaged, currentPage, sorted, pageSize])
 
-  const tabItems = useMemo(
-    () => [
+  const tabItems = useMemo(() => {
+    if (serverPaged) {
+      return [
+        { id: 'all', label: `All(${searchTotal})` },
+        {
+          id: 'pages',
+          label: `Page(${searchPageTabTotal ?? 0})`,
+        },
+        { id: 'documents', label: `Document(${documents.length})` },
+        { id: 'assets', label: `Asset(${assets.length})` },
+      ]
+    }
+    return [
       { id: 'all', label: `All(${all.length})` },
       { id: 'pages', label: `Page(${pages.length})` },
       { id: 'documents', label: `Document(${documents.length})` },
       { id: 'assets', label: `Asset(${assets.length})` },
-    ],
-    [all.length, pages.length, documents.length, assets.length]
-  )
+    ]
+  }, [
+    serverPaged,
+    searchTotal,
+    searchPageTabTotal,
+    all.length,
+    pages.length,
+    documents.length,
+    assets.length,
+  ])
 
-  const subtitle = query ? `${all.length} search results` : '0 search results'
+  const subtitle = useMemo(() => {
+    if (!query) return '0 search results'
+    if (!serverPaged) return `${all.length} search results`
+    if (activeTab === 'pages') return `${searchPageTabTotal ?? 0} search results`
+    return `${searchTotal ?? 0} search results`
+  }, [query, serverPaged, activeTab, all.length, searchTotal, searchPageTabTotal])
 
   const onTabChange = (id: string) => {
     setActiveTab(id as TabId)
-    setPage(1)
+    if (serverPaged) goToSearchPage(1)
+    else setPage(1)
   }
 
   const onSearchSubmit = (e: FormEvent) => {
@@ -181,7 +279,8 @@ export function SearchResultsBlock({ locale, query }: SearchResultsBlockProps) {
   }
 
   const toggleTopic = (topic: string, closeOnMobile = false) => {
-    setPage(1)
+    if (serverPaged) goToSearchPage(1)
+    else setPage(1)
     setActiveTopics((prev) =>
       prev.includes(topic) ? prev.filter((v) => v !== topic) : [...prev, topic]
     )
@@ -253,7 +352,8 @@ export function SearchResultsBlock({ locale, query }: SearchResultsBlockProps) {
                   className={styles.sortItem}
                   onSelect={() => {
                     setSort('relevance')
-                    setPage(1)
+                    if (serverPaged) goToSearchPage(searchPage)
+                    else setPage(1)
                   }}
                 >
                   Relevance
@@ -264,7 +364,8 @@ export function SearchResultsBlock({ locale, query }: SearchResultsBlockProps) {
                   onSelect={() => {
                     if (!allowNewest) return
                     setSort('newest')
-                    setPage(1)
+                    if (serverPaged) goToSearchPage(searchPage)
+                    else setPage(1)
                   }}
                 >
                   Newest
@@ -428,9 +529,12 @@ export function SearchResultsBlock({ locale, query }: SearchResultsBlockProps) {
                               {item.description}
                             </p>
                           ) : null}
-                          <p
-                            className={styles.resultLink}
-                          >{`https://krungthai.com/en${item.path}`}</p>
+                          <p className={styles.resultLink}>
+                            {`${(
+                              process.env.NEXT_PUBLIC_SITE_URL ??
+                              'https://krungthai.com'
+                            ).replace(/\/$/, '')}/${locale}${item.path}`}
+                          </p>
                         </div>
                       </article>
                       {idx < pageItems.length - 1 ? (
@@ -451,7 +555,10 @@ export function SearchResultsBlock({ locale, query }: SearchResultsBlockProps) {
               totalPages={totalPages}
               totalItems={totalItems}
               pageSize={pageSize}
-              onPageChange={(p) => setPage(p)}
+              onPageChange={(p) => {
+                if (serverPaged) goToSearchPage(p)
+                else setPage(p)
+              }}
             />
           </div>
         ) : null}

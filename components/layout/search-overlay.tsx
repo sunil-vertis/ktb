@@ -24,6 +24,7 @@ import styles from '@/styles/components/search-overlay.module.scss'
 
 const RECENT_STORAGE_KEY = 'ktb-search-recent'
 const MAX_RECENT = 5
+const AUTOCOMPLETE_DEBOUNCE_MS = 280
 
 const PLACEHOLDER_DESKTOP = 'Explore products, services, or seek help'
 const PLACEHOLDER_MOBILE = 'Explore products, services, or …'
@@ -140,12 +141,19 @@ export function SearchOverlay({ open, onClose, locale }: SearchOverlayProps) {
   const [mounted, setMounted] = useState(false)
   const [query, setQuery] = useState('')
   const [recent, setRecent] = useState<string[]>([])
+  const [apiSuggestions, setApiSuggestions] = useState<string[]>([])
+  const [autocompleteLoading, setAutocompleteLoading] = useState(false)
 
   const queryTrimmed = query.trim()
-  const liveMatches = useMemo(
+  const corpusMatches = useMemo(
     () => (queryTrimmed ? rankSearchMatches(queryTrimmed, 24) : []),
     [queryTrimmed]
   )
+
+  const liveMatches = useMemo(() => {
+    if (apiSuggestions.length > 0) return apiSuggestions
+    return corpusMatches
+  }, [apiSuggestions, corpusMatches])
 
   const refreshRecent = useCallback(() => {
     setRecent(readRecent())
@@ -159,11 +167,52 @@ export function SearchOverlay({ open, onClose, locale }: SearchOverlayProps) {
     if (!open) return
     refreshRecent()
     setQuery('')
+    setApiSuggestions([])
+    setAutocompleteLoading(false)
     const t = window.requestAnimationFrame(() => {
       inputRef.current?.focus()
     })
     return () => window.cancelAnimationFrame(t)
   }, [open, refreshRecent])
+
+  useEffect(() => {
+    if (!open || !queryTrimmed) {
+      setApiSuggestions([])
+      setAutocompleteLoading(false)
+      return
+    }
+
+    const ac = new AbortController()
+    const t = window.setTimeout(() => {
+      void (async () => {
+        setAutocompleteLoading(true)
+        try {
+          const params = new URLSearchParams({
+            q: queryTrimmed,
+            locale,
+          })
+          const res = await fetch(`/api/search-autocomplete?${params.toString()}`, {
+            signal: ac.signal,
+          })
+          const data = (await res.json()) as { suggestions?: unknown }
+          const list = Array.isArray(data.suggestions)
+            ? data.suggestions.filter((x): x is string => typeof x === 'string')
+            : []
+          if (!ac.signal.aborted) setApiSuggestions(list)
+        } catch {
+          if (!ac.signal.aborted) setApiSuggestions([])
+        } finally {
+          if (!ac.signal.aborted) setAutocompleteLoading(false)
+        }
+      })()
+    }, AUTOCOMPLETE_DEBOUNCE_MS)
+
+    return () => {
+      window.clearTimeout(t)
+      ac.abort()
+      setAutocompleteLoading(false)
+    }
+  }, [open, queryTrimmed, locale])
 
   useEffect(() => {
     if (!open) return
@@ -313,6 +362,7 @@ export function SearchOverlay({ open, onClose, locale }: SearchOverlayProps) {
                   spellCheck={false}
                   aria-autocomplete="list"
                   aria-controls={queryTrimmed ? listboxId : undefined}
+                  aria-busy={autocompleteLoading}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder={placeholder}
                   className={styles.input}

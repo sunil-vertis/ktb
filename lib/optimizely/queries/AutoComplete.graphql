@@ -1,0 +1,9 @@
+query AutoComplete($searchText: String!, $language: [Locales]) {
+  Searchable(locale: $language) {
+    autocomplete {
+      SearchTitle {
+        html(value: $searchText, limit: 5)
+      }
+    }
+  }
+}

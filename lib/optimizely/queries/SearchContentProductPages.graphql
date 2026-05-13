@@ -1,0 +1,38 @@
+query SearchContentProductPages(
+  $searchText: String!
+  $language: [Locales]
+  $skip: Int!
+  $limit: Int!
+) {
+  Searchable(
+    locale: $language
+    where: {
+      _fulltext: { match: $searchText }
+      _itemMetadata: { type: { eq: "ProductPage" } }
+    }
+    skip: $skip
+    limit: $limit
+  ) {
+    total
+    items {
+      __typename
+      SearchDate
+      SearchDescription {
+        html
+      }
+      SearchKeywords
+      SearchTitle {
+        html
+      }
+      _metadata {
+        url {
+          default
+        }
+        locale
+      }
+      _itemMetadata {
+        type
+      }
+    }
+  }
+}

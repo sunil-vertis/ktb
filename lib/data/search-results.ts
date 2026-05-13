@@ -26,6 +26,9 @@ export type SearchResultItem = {
   publishedAt?: string
 }
 
+/** One search hit with a client-side relevance score (sorting / tabs). */
+export type SearchResultRow = SearchResultItem & { score: number }
+
 const CORE_RESULTS: SearchResultItem[] = [
   {
     id: 'page-auto-loan',

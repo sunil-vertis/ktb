@@ -8,7 +8,12 @@ import { GlobalIcon } from '@/components/ui/global-icon'
 
 import type { DownloadSectionBlockFragmentFragment } from '@/lib/optimizely/types/generated'
 
-import { linkToAbsoluteUrl } from './map-cms'
+import {
+  assetFromDownloadMedia,
+  displaySizeFromBytes,
+  linkToAbsoluteUrl,
+  mimeTypeToFileExtension,
+} from './map-cms'
 
 type DownloadSortKey = 'name' | 'date-newest' | 'date-oldest' | 'size'
 
@@ -16,10 +21,13 @@ export type DownloadResourceItem = {
   id: string
   label: string
   extension?: string
+  /** From media `mimeType` when present (for display). */
+  mimeType?: string
   sizeLabel?: string
   sizeInMb?: number
   publishedAt?: string
-  href: string
+  /** Omitted when no URL is available from CMS. */
+  href?: string
 }
 
 export type DownloadSectionBlockProps = {
@@ -30,36 +38,6 @@ export type DownloadSectionBlockProps = {
   sectionId?: string
 }
 
-const DEFAULT_ITEMS: DownloadResourceItem[] = [
-  {
-    id: 'sales-sheet',
-    label: 'Sales Sheet for Krungthai Thanawat Loan',
-    extension: 'PDF',
-    sizeLabel: '0.19 MB',
-    sizeInMb: 0.19,
-    publishedAt: '2026-04-01',
-    href: '#',
-  },
-  {
-    id: 'loan-calculation',
-    label: 'Krungthai Thanawat loan calculation',
-    extension: 'PDF',
-    sizeLabel: '0.19 MB',
-    sizeInMb: 0.19,
-    publishedAt: '2026-04-01',
-    href: '#',
-  },
-  {
-    id: 'interest-fees-expenses',
-    label: 'Interest rates, service fees, charges, and other expenses',
-    extension: 'PDF',
-    sizeLabel: '0.19 MB',
-    sizeInMb: 0.19,
-    publishedAt: '2026-04-01',
-    href: '#',
-  },
-]
-
 const SORT_OPTIONS: Array<{ value: DownloadSortKey; label: string }> = [
   { value: 'name', label: 'Sort by Name' },
   { value: 'date-newest', label: 'Sort by Date (Newest)' },
@@ -68,9 +46,9 @@ const SORT_OPTIONS: Array<{ value: DownloadSortKey; label: string }> = [
 ]
 
 function formatPublishedDate(dateString?: string): string {
-  if (!dateString) return 'Date unavailable'
+  if (!dateString?.trim()) return ''
   const date = new Date(dateString)
-  if (Number.isNaN(date.getTime())) return 'Date unavailable'
+  if (Number.isNaN(date.getTime())) return ''
   return new Intl.DateTimeFormat('en-GB', {
     day: '2-digit',
     month: 'short',
@@ -93,9 +71,9 @@ function compareBySort(a: DownloadResourceItem, b: DownloadResourceItem, sortKey
 }
 
 export function DownloadSectionBlockFE({
-  title = 'Downloadable Resources',
-  sortLabel = 'Sort resources',
-  items = DEFAULT_ITEMS,
+  title,
+  sortLabel,
+  items = [],
   className,
   sectionId,
 }: DownloadSectionBlockProps) {
@@ -112,10 +90,10 @@ export function DownloadSectionBlockFE({
       aria-label="Downloadable resources"
     >
       <div className="download-section__header">
-        <h2 className="download-section__title type-heading-h3">{title}</h2>
+        <h2 className="download-section__title type-heading-h3">{title ?? ''}</h2>
         <div className="download-section__sort-wrap">
           <label className="sr-only" htmlFor="download-sort">
-            {sortLabel}
+            {sortLabel ?? ''}
           </label>
           <div className="download-section__sort-control">
             <select
@@ -123,7 +101,7 @@ export function DownloadSectionBlockFE({
               className="download-section__sort-select type-body-base-regular"
               value={sortKey}
               onChange={(e) => setSortKey(e.target.value as DownloadSortKey)}
-              aria-label={sortLabel}
+              aria-label={sortLabel ?? ''}
             >
               {SORT_OPTIONS.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -148,30 +126,53 @@ export function DownloadSectionBlockFE({
             )}
           >
             <div className="download-section__item-meta">
-              <span className="download-section__badge type-body-small-medium">
-                {item.extension ?? 'FILE'}
-              </span>
+              {item.extension ? (
+                <span className="download-section__badge type-body-small-medium">
+                  {item.extension}
+                </span>
+              ) : null}
               <div className="download-section__item-text">
                 <p className="download-section__item-title type-body-base-medium">
                   {item.label}
                 </p>
                 <p className="download-section__item-subtext type-body-small-regular">
-                  {item.sizeLabel ?? 'Unknown size'} · {formatPublishedDate(item.publishedAt)}
+                  {[item.sizeLabel, formatPublishedDate(item.publishedAt), item.mimeType]
+                    .filter((s) => s && String(s).trim())
+                    .join(' · ')}
                 </p>
               </div>
             </div>
-            <Button
-              asChild
-              variant="secondary"
-              size="sm"
-              className="download-section__download-btn"
-              icon={<GlobalIcon type="download" size="S" />}
-              iconPosition="right"
-            >
-              <a href={item.href} download>
+            {item.href ? (
+              <Button
+                asChild
+                variant="secondary"
+                size="sm"
+                className="download-section__download-btn"
+                icon={<GlobalIcon type="download" size="S" />}
+                iconPosition="right"
+              >
+                <a
+                  href={item.href}
+                  download
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Download
+                </a>
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                className="download-section__download-btn"
+                disabled
+                icon={<GlobalIcon type="download" size="S" />}
+                iconPosition="right"
+              >
                 Download
-              </a>
-            </Button>
+              </Button>
+            )}
           </article>
         ))}
       </div>
@@ -184,25 +185,62 @@ type CmsDownloadSectionProps = Omit<
   '__typename'
 >
 
+function sortLabelFromOptionBlocks(
+  list: CmsDownloadSectionProps['sortLabelList'] | null | undefined
+): string | undefined {
+  const text =
+    list
+      ?.map((item) => {
+        if (item?.__typename === 'OptionBlock') {
+          return item.OptionText?.trim() ?? ''
+        }
+        return ''
+      })
+      .find((s) => s.length > 0) ?? ''
+  return text || undefined
+}
+
 export default function DownloadSectionBlock(props: CmsDownloadSectionProps) {
   const items: DownloadResourceItem[] = []
   props.Items?.forEach((it, index) => {
     if (!it || it.__typename !== 'DownloadResourceBlock') return
-    const href = linkToAbsoluteUrl(
+    const asset = assetFromDownloadMedia(it.DownloadMedia)
+    const linkHref = linkToAbsoluteUrl(
       it.Href as Parameters<typeof linkToAbsoluteUrl>[0]
     )
-    if (!href) return
-    const id = it.Id?.trim() || `dl-${index}`
-    const label = it.Label?.trim() || 'Download'
+    const href = linkHref || asset?.url || undefined
+
+    const blockExt = it.Extension?.trim()
+    const extension =
+      blockExt || mimeTypeToFileExtension(asset?.mimeType) || undefined
+
+    const fromBytes =
+      asset?.fileSize != null && asset.fileSize > 0
+        ? displaySizeFromBytes(asset.fileSize)
+        : undefined
+    const blockSizeLabel = it.SizeLabel?.trim()
+    const sizeLabel = blockSizeLabel || fromBytes?.sizeLabel
+    const sizeInMb =
+      it.SizeInMb != null && Number.isFinite(it.SizeInMb) && it.SizeInMb > 0
+        ? it.SizeInMb
+        : fromBytes?.sizeInMb
+
+    const blockPublished = it.PublishedAt
+      ? String(it.PublishedAt).slice(0, 10)
+      : undefined
+    const publishedAt =
+      blockPublished ||
+      asset?.lastModifiedDay ||
+      asset?.contentModifiedDay
+
     items.push({
-      id,
-      label,
-      extension: it.Extension ?? undefined,
-      sizeLabel: it.SizeLabel ?? undefined,
-      sizeInMb: it.SizeInMb ?? undefined,
-      publishedAt: it.PublishedAt
-        ? String(it.PublishedAt).slice(0, 10)
-        : undefined,
+      id: it.Id?.trim() ?? String(index),
+      label: it.Label?.trim() ?? '',
+      extension,
+      mimeType: asset?.mimeType,
+      sizeLabel,
+      sizeInMb,
+      publishedAt,
       href,
     })
   })
@@ -210,8 +248,8 @@ export default function DownloadSectionBlock(props: CmsDownloadSectionProps) {
   return (
     <DownloadSectionBlockFE
       title={props.Title ?? undefined}
-      sortLabel={props.SortLabel ?? undefined}
-      items={items.length ? items : undefined}
+      sortLabel={sortLabelFromOptionBlocks(props.sortLabelList)}
+      items={items}
     />
   )
 }

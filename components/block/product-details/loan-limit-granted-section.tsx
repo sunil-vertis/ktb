@@ -3,8 +3,6 @@ import clsx from 'clsx'
 
 import type { LoanLimitGrantedSectionBlockFragmentFragment } from '@/lib/optimizely/types/generated'
 
-import { parseLimitGrantedColumnHeaders } from './map-cms'
-
 export type LoanLimitGrantedSectionProps = {
   title?: string
   /** Header row (3 columns). */
@@ -152,8 +150,18 @@ export default function LoanLimitGrantedSection(
   props: CmsLoanLimitGrantedSectionProps
 ) {
   const columnHeaders =
-    parseLimitGrantedColumnHeaders(props.columnHeadersText ?? undefined) ??
-    DEFAULT_HEADERS
+    props.columnHeadersList
+      ?.map((item) => {
+        if (item?.__typename === 'OptionBlock') {
+          return (
+            item.OptionText?.trim() ||
+            item.OptionValue?.trim() ||
+            ''
+          )
+        }
+        return ''
+      })
+      .filter((h) => h.length > 0) ?? undefined
 
   const rows =
     props.Rows?.map((r) => {
@@ -172,7 +180,9 @@ export default function LoanLimitGrantedSection(
     <LoanLimitGrantedSectionFE
       title={props.Title ?? undefined}
       columnHeaders={
-        columnHeaders.length >= 3 ? columnHeaders : DEFAULT_HEADERS
+        columnHeaders && columnHeaders.length >= 3
+          ? columnHeaders
+          : DEFAULT_HEADERS
       }
       rows={rows?.length ? rows : DEFAULT_ROWS}
     />

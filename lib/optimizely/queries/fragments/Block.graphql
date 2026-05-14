@@ -280,18 +280,10 @@ fragment CampaignBannerBlockFragment on CampaignBannerBlock {
 }
 
 fragment HeroBannerBlockFragment on HeroBannerBlock {
-  _id
   activeDotIndex
-  _metadata {
-    key
-  }
   items {
     __typename
     ... on HeroBannerItem {
-      _id
-      _metadata {
-        key
-      }
       badgeLabel
       title
       subtitle

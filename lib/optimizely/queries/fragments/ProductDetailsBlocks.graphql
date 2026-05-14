@@ -146,7 +146,12 @@ fragment LoanLimitGrantedTableRowBlockFragment on LoanLimitGrantedTableRowBlock 
 
 fragment LoanLimitGrantedSectionBlockFragment on LoanLimitGrantedSectionBlock {
   Title
-  columnHeadersText: ColumnHeaders
+  columnHeadersList: ColumnHeaders {
+    __typename
+    ... on OptionBlock {
+      ...OptionBlockFragment
+    }
+  }
   Rows {
     __typename
     ... on LoanLimitGrantedTableRowBlock {
@@ -241,11 +246,68 @@ fragment DownloadResourceBlockFragment on DownloadResourceBlock {
       internal
     }
   }
+  DownloadMedia {
+    __typename
+    _itemMetadata {
+      lastModified
+      type
+    }
+    ... on GenericMedia {
+      _deleted
+      _modified
+      _itemMetadata {
+        key
+        displayName
+        lastModified
+        type
+      }
+      _assetMetadata {
+        fileSize
+        mimeType
+        url
+      }
+    }
+    ... on ImageMedia {
+      _deleted
+      _modified
+      _itemMetadata {
+        key
+        displayName
+        lastModified
+        type
+      }
+      _assetMetadata {
+        fileSize
+        mimeType
+        url
+      }
+    }
+    ... on _Media {
+      _deleted
+      _modified
+      _itemMetadata {
+        key
+        displayName
+        lastModified
+        type
+      }
+      _assetMetadata {
+        fileSize
+        mimeType
+        url
+      }
+    }
+  }
 }
 
 fragment DownloadSectionBlockFragment on DownloadSectionBlock {
   Title
-  SortLabel
+  sortLabelList: SortLabel {
+    __typename
+    ... on OptionBlock {
+      ...OptionBlockFragment
+    }
+  }
   Items {
     __typename
     ... on DownloadResourceBlock {

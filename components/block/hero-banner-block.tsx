@@ -12,8 +12,6 @@ import type { HeroBannerBlockFragmentFragment } from '@/lib/optimizely/types/gen
 import styles from '@/styles/components/hero-banner-block.module.scss'
 
 export type HeroBannerBlockProps = {
-  /** Draft / preview: relaxes Swiper behavior so CMS on-page edit can receive clicks. */
-  preview?: boolean
   badgeLabel?: string
   title?: string
   subtitle?: string
@@ -32,8 +30,6 @@ export type HeroBannerBlockProps = {
 }
 
 export type HeroBannerItem = {
-  /** Nested OPE: Graph `_id` (preferred) or `_metadata.key` for this slide. */
-  epiBlockId?: string
   badgeLabel?: string
   title: string
   subtitle?: string
@@ -47,7 +43,6 @@ export type HeroBannerItem = {
 
 /** Presentational hero (preview / Storybook). CMS pages use the default export mapper. */
 export function HeroBannerBlockFE({
-  preview = false,
   badgeLabel = 'Personal Loan',
   title = '',
   subtitle,
@@ -61,7 +56,6 @@ export function HeroBannerBlockFE({
   items,
 }: HeroBannerBlockProps) {
   const fallbackItem: HeroBannerItem = {
-    epiBlockId: undefined,
     badgeLabel,
     title,
     subtitle,
@@ -82,16 +76,9 @@ export function HeroBannerBlockFE({
     const resolvedMobileSrc = item.mobileImageSrc ?? resolvedDesktopSrc
 
     return (
-      <article
-        className={styles.slideContent}
-        {...(item.epiBlockId ? { 'data-epi-block-id': item.epiBlockId } : {})}
-      >
+      <article className={styles.slideContent}>
         <picture className={styles.picture}>
-          <source
-            media="(max-width: 767px)"
-            srcSet={resolvedMobileSrc}
-            data-epi-edit="mobileImageSrc"
-          />
+          <source media="(max-width: 767px)" srcSet={resolvedMobileSrc} />
           <img
             src={resolvedDesktopSrc}
             alt=""
@@ -99,17 +86,13 @@ export function HeroBannerBlockFE({
             className={styles.image}
             loading="lazy"
             decoding="async"
-            data-epi-edit="desktopImageSrc"
           />
         </picture>
 
         <div className={styles.content}>
           <div className={cn(styles.contentInner, 'container mx-auto px-4')}>
             <div className={styles.textBlock}>
-              <span
-                className={cn('type-label-small-regular', styles.badge)}
-                data-epi-edit="badgeLabel"
-              >
+              <span className={cn('type-label-small-regular', styles.badge)}>
                 {item.badgeLabel ?? 'Personal Loan'}
               </span>
 
@@ -120,12 +103,12 @@ export function HeroBannerBlockFE({
                 {item.title}
               </h1>
 
-              {preview || item.subtitle ? (
+              {item.subtitle ? (
                 <p
                   className={cn('type-body-large-regular', styles.subtitle)}
                   data-epi-edit="subtitle"
                 >
-                  {item.subtitle ?? ''}
+                  {item.subtitle}
                 </p>
               ) : null}
             </div>
@@ -140,11 +123,8 @@ export function HeroBannerBlockFE({
                 <Link
                   href={item.primaryCtaHref ?? '#'}
                   aria-label={item.primaryCtaLabel ?? 'Request information'}
-                  data-epi-edit="primaryCtaHref"
                 >
-                  <span data-epi-edit="primaryCtaLabel">
-                    {item.primaryCtaLabel ?? 'Request information'}
-                  </span>
+                  {item.primaryCtaLabel ?? 'Request information'}
                 </Link>
               </Button>
 
@@ -157,11 +137,8 @@ export function HeroBannerBlockFE({
                 <Link
                   href={item.secondaryCtaHref ?? '#'}
                   aria-label={item.secondaryCtaLabel ?? 'Download brochure'}
-                  data-epi-edit="secondaryCtaHref"
                 >
-                  <span data-epi-edit="secondaryCtaLabel">
-                    {item.secondaryCtaLabel ?? 'Download brochure'}
-                  </span>
+                  {item.secondaryCtaLabel ?? 'Download brochure'}
                 </Link>
               </Button>
             </div>
@@ -173,39 +150,31 @@ export function HeroBannerBlockFE({
 
   return (
     <section className={styles.heroBanner} aria-label="Hero banner">
-      <div
-        className="relative w-full"
-        {...(preview ? { 'data-epi-edit': 'items' } : {})}
-      >
-        {hasMultipleItems ? (
-          <>
-            <Swiper
-              className={styles.slider}
-              modules={[Pagination]}
-              initialSlide={safeActiveIndex}
-              slidesPerView={1}
-              pagination={{
-                el: `.${paginationClass}`,
-                clickable: true,
-                bulletClass: styles.dot,
-                bulletActiveClass: styles.dotActive,
-              }}
-            >
-              {slides.map((item, index) => (
-                <SwiperSlide
-                  key={`${item.title}-${index}`}
-                  className={styles.slide}
-                >
-                  {renderSlide(item)}
-                </SwiperSlide>
-              ))}
-            </Swiper>
-            <div className={cn(styles.dots, paginationClass)} aria-hidden="true" />
-          </>
-        ) : (
-          renderSlide(slides[0])
-        )}
-      </div>
+      {hasMultipleItems ? (
+        <>
+          <Swiper
+            className={styles.slider}
+            modules={[Pagination]}
+            initialSlide={safeActiveIndex}
+            slidesPerView={1}
+            pagination={{
+              el: `.${paginationClass}`,
+              clickable: true,
+              bulletClass: styles.dot,
+              bulletActiveClass: styles.dotActive,
+            }}
+          >
+            {slides.map((item, index) => (
+              <SwiperSlide key={`${item.title}-${index}`} className={styles.slide}>
+                {renderSlide(item)}
+              </SwiperSlide>
+            ))}
+          </Swiper>
+          <div className={cn(styles.dots, paginationClass)} aria-hidden="true" />
+        </>
+      ) : (
+        renderSlide(slides[0])
+      )}
     </section>
   )
 }
@@ -217,7 +186,7 @@ type HeroBannerBlockCmsProps = Omit<HeroBannerBlockFragmentFragment, '__typename
 type HeroBannerItemRow = Extract<
   NonNullable<NonNullable<HeroBannerBlockFragmentFragment['items']>[number]>,
   { __typename: 'HeroBannerItem' }
-> & { _id?: string | null }
+>
 
 function firstUrl(
   url:
@@ -275,8 +244,6 @@ function mapCmsItems(
     const title = row.title?.trim()
     if (!title) continue
     out.push({
-      epiBlockId:
-        row._id?.trim() || row._metadata?.key?.trim() || undefined,
       badgeLabel: row.badgeLabel ?? undefined,
       title,
       subtitle: row.subtitle ?? undefined,
@@ -298,17 +265,9 @@ function parseActiveDotIndex(raw: number | null | undefined): number | undefined
 }
 
 /** Optimizely `HeroBannerBlock` from page queries → {@link HeroBannerBlockFE}. */
-export default function HeroBannerBlock(
-  props: HeroBannerBlockCmsProps & { preview?: boolean }
-) {
+export default function HeroBannerBlock(props: HeroBannerBlockCmsProps) {
   const slides = mapCmsItems(props.items)
   const dot = parseActiveDotIndex(props.activeDotIndex ?? undefined)
 
-  return (
-    <HeroBannerBlockFE
-      preview={props.preview}
-      activeDotIndex={dot ?? 0}
-      items={slides}
-    />
-  )
+  return <HeroBannerBlockFE activeDotIndex={dot ?? 0} items={slides} />
 }

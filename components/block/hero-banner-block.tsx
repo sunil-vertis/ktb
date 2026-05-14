@@ -12,6 +12,8 @@ import type { HeroBannerBlockFragmentFragment } from '@/lib/optimizely/types/gen
 import styles from '@/styles/components/hero-banner-block.module.scss'
 
 export type HeroBannerBlockProps = {
+  /** Optimizely on-page editing: parent block content key (`_metadata.key`). */
+  blockEpiId?: string
   badgeLabel?: string
   title?: string
   subtitle?: string
@@ -30,6 +32,8 @@ export type HeroBannerBlockProps = {
 }
 
 export type HeroBannerItem = {
+  /** Per-slide content key for nested OPE (`HeroBannerItem._metadata.key`). */
+  epiBlockId?: string
   badgeLabel?: string
   title: string
   subtitle?: string
@@ -43,6 +47,7 @@ export type HeroBannerItem = {
 
 /** Presentational hero (preview / Storybook). CMS pages use the default export mapper. */
 export function HeroBannerBlockFE({
+  blockEpiId,
   badgeLabel = 'Personal Loan',
   title = '',
   subtitle,
@@ -56,6 +61,7 @@ export function HeroBannerBlockFE({
   items,
 }: HeroBannerBlockProps) {
   const fallbackItem: HeroBannerItem = {
+    epiBlockId: undefined,
     badgeLabel,
     title,
     subtitle,
@@ -76,9 +82,16 @@ export function HeroBannerBlockFE({
     const resolvedMobileSrc = item.mobileImageSrc ?? resolvedDesktopSrc
 
     return (
-      <article className={styles.slideContent}>
+      <article
+        className={styles.slideContent}
+        {...(item.epiBlockId ? { 'data-epi-block-id': item.epiBlockId } : {})}
+      >
         <picture className={styles.picture}>
-          <source media="(max-width: 767px)" srcSet={resolvedMobileSrc} />
+          <source
+            media="(max-width: 767px)"
+            srcSet={resolvedMobileSrc}
+            data-epi-edit="mobileImageSrc"
+          />
           <img
             src={resolvedDesktopSrc}
             alt=""
@@ -86,13 +99,17 @@ export function HeroBannerBlockFE({
             className={styles.image}
             loading="lazy"
             decoding="async"
+            data-epi-edit="desktopImageSrc"
           />
         </picture>
 
         <div className={styles.content}>
           <div className={cn(styles.contentInner, 'container mx-auto px-4')}>
             <div className={styles.textBlock}>
-              <span className={cn('type-label-small-regular', styles.badge)}>
+              <span
+                className={cn('type-label-small-regular', styles.badge)}
+                data-epi-edit="badgeLabel"
+              >
                 {item.badgeLabel ?? 'Personal Loan'}
               </span>
 
@@ -123,8 +140,11 @@ export function HeroBannerBlockFE({
                 <Link
                   href={item.primaryCtaHref ?? '#'}
                   aria-label={item.primaryCtaLabel ?? 'Request information'}
+                  data-epi-edit="primaryCtaHref"
                 >
-                  {item.primaryCtaLabel ?? 'Request information'}
+                  <span data-epi-edit="primaryCtaLabel">
+                    {item.primaryCtaLabel ?? 'Request information'}
+                  </span>
                 </Link>
               </Button>
 
@@ -137,8 +157,11 @@ export function HeroBannerBlockFE({
                 <Link
                   href={item.secondaryCtaHref ?? '#'}
                   aria-label={item.secondaryCtaLabel ?? 'Download brochure'}
+                  data-epi-edit="secondaryCtaHref"
                 >
-                  {item.secondaryCtaLabel ?? 'Download brochure'}
+                  <span data-epi-edit="secondaryCtaLabel">
+                    {item.secondaryCtaLabel ?? 'Download brochure'}
+                  </span>
                 </Link>
               </Button>
             </div>
@@ -149,7 +172,11 @@ export function HeroBannerBlockFE({
   }
 
   return (
-    <section className={styles.heroBanner} aria-label="Hero banner">
+    <section
+      className={styles.heroBanner}
+      aria-label="Hero banner"
+      {...(blockEpiId ? { 'data-epi-block-id': blockEpiId } : {})}
+    >
       {hasMultipleItems ? (
         <>
           <Swiper
@@ -165,7 +192,7 @@ export function HeroBannerBlockFE({
             }}
           >
             {slides.map((item, index) => (
-              <SwiperSlide key={`${item.title}-${index}`} className={styles.slide}>
+              <SwiperSlide key={`${item.title}-${index}`} className={styles.slide} >
                 {renderSlide(item)}
               </SwiperSlide>
             ))}
@@ -244,6 +271,7 @@ function mapCmsItems(
     const title = row.title?.trim()
     if (!title) continue
     out.push({
+      epiBlockId: row._metadata?.key?.trim() || undefined,
       badgeLabel: row.badgeLabel ?? undefined,
       title,
       subtitle: row.subtitle ?? undefined,
@@ -268,6 +296,13 @@ function parseActiveDotIndex(raw: number | null | undefined): number | undefined
 export default function HeroBannerBlock(props: HeroBannerBlockCmsProps) {
   const slides = mapCmsItems(props.items)
   const dot = parseActiveDotIndex(props.activeDotIndex ?? undefined)
+  const blockEpiId = props._metadata?.key?.trim() || undefined
 
-  return <HeroBannerBlockFE activeDotIndex={dot ?? 0} items={slides} />
+  return (
+    <HeroBannerBlockFE
+      blockEpiId={blockEpiId}
+      activeDotIndex={dot ?? 0}
+      items={slides}
+    />
+  )
 }

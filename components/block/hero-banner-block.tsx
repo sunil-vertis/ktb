@@ -12,8 +12,8 @@ import type { HeroBannerBlockFragmentFragment } from '@/lib/optimizely/types/gen
 import styles from '@/styles/components/hero-banner-block.module.scss'
 
 export type HeroBannerBlockProps = {
-  /** Optimizely on-page editing: parent block content key (`_metadata.key`). */
-  blockEpiId?: string
+  /** Draft / preview: relaxes Swiper behavior so CMS on-page edit can receive clicks. */
+  preview?: boolean
   badgeLabel?: string
   title?: string
   subtitle?: string
@@ -32,7 +32,7 @@ export type HeroBannerBlockProps = {
 }
 
 export type HeroBannerItem = {
-  /** Per-slide content key for nested OPE (`HeroBannerItem._metadata.key`). */
+  /** Nested OPE: Graph `_id` (preferred) or `_metadata.key` for this slide. */
   epiBlockId?: string
   badgeLabel?: string
   title: string
@@ -47,7 +47,7 @@ export type HeroBannerItem = {
 
 /** Presentational hero (preview / Storybook). CMS pages use the default export mapper. */
 export function HeroBannerBlockFE({
-  blockEpiId,
+  preview = false,
   badgeLabel = 'Personal Loan',
   title = '',
   subtitle,
@@ -120,12 +120,12 @@ export function HeroBannerBlockFE({
                 {item.title}
               </h1>
 
-              {item.subtitle ? (
+              {preview || item.subtitle ? (
                 <p
                   className={cn('type-body-large-regular', styles.subtitle)}
                   data-epi-edit="subtitle"
                 >
-                  {item.subtitle}
+                  {item.subtitle ?? ''}
                 </p>
               ) : null}
             </div>
@@ -172,36 +172,40 @@ export function HeroBannerBlockFE({
   }
 
   return (
-    <section
-      className={styles.heroBanner}
-      aria-label="Hero banner"
-      {...(blockEpiId ? { 'data-epi-block-id': blockEpiId } : {})}
-    >
-      {hasMultipleItems ? (
-        <>
-          <Swiper
-            className={styles.slider}
-            modules={[Pagination]}
-            initialSlide={safeActiveIndex}
-            slidesPerView={1}
-            pagination={{
-              el: `.${paginationClass}`,
-              clickable: true,
-              bulletClass: styles.dot,
-              bulletActiveClass: styles.dotActive,
-            }}
-          >
-            {slides.map((item, index) => (
-              <SwiperSlide key={`${item.title}-${index}`} className={styles.slide} >
-                {renderSlide(item)}
-              </SwiperSlide>
-            ))}
-          </Swiper>
-          <div className={cn(styles.dots, paginationClass)} aria-hidden="true" />
-        </>
-      ) : (
-        renderSlide(slides[0])
-      )}
+    <section className={styles.heroBanner} aria-label="Hero banner">
+      <div
+        className="relative w-full"
+        {...(preview ? { 'data-epi-edit': 'items' } : {})}
+      >
+        {hasMultipleItems ? (
+          <>
+            <Swiper
+              className={styles.slider}
+              modules={[Pagination]}
+              initialSlide={safeActiveIndex}
+              slidesPerView={1}
+              pagination={{
+                el: `.${paginationClass}`,
+                clickable: true,
+                bulletClass: styles.dot,
+                bulletActiveClass: styles.dotActive,
+              }}
+            >
+              {slides.map((item, index) => (
+                <SwiperSlide
+                  key={`${item.title}-${index}`}
+                  className={styles.slide}
+                >
+                  {renderSlide(item)}
+                </SwiperSlide>
+              ))}
+            </Swiper>
+            <div className={cn(styles.dots, paginationClass)} aria-hidden="true" />
+          </>
+        ) : (
+          renderSlide(slides[0])
+        )}
+      </div>
     </section>
   )
 }
@@ -213,7 +217,7 @@ type HeroBannerBlockCmsProps = Omit<HeroBannerBlockFragmentFragment, '__typename
 type HeroBannerItemRow = Extract<
   NonNullable<NonNullable<HeroBannerBlockFragmentFragment['items']>[number]>,
   { __typename: 'HeroBannerItem' }
->
+> & { _id?: string | null }
 
 function firstUrl(
   url:
@@ -271,7 +275,8 @@ function mapCmsItems(
     const title = row.title?.trim()
     if (!title) continue
     out.push({
-      epiBlockId: row._metadata?.key?.trim() || undefined,
+      epiBlockId:
+        row._id?.trim() || row._metadata?.key?.trim() || undefined,
       badgeLabel: row.badgeLabel ?? undefined,
       title,
       subtitle: row.subtitle ?? undefined,
@@ -293,14 +298,15 @@ function parseActiveDotIndex(raw: number | null | undefined): number | undefined
 }
 
 /** Optimizely `HeroBannerBlock` from page queries → {@link HeroBannerBlockFE}. */
-export default function HeroBannerBlock(props: HeroBannerBlockCmsProps) {
+export default function HeroBannerBlock(
+  props: HeroBannerBlockCmsProps & { preview?: boolean }
+) {
   const slides = mapCmsItems(props.items)
   const dot = parseActiveDotIndex(props.activeDotIndex ?? undefined)
-  const blockEpiId = props._metadata?.key?.trim() || undefined
 
   return (
     <HeroBannerBlockFE
-      blockEpiId={blockEpiId}
+      preview={props.preview}
       activeDotIndex={dot ?? 0}
       items={slides}
     />

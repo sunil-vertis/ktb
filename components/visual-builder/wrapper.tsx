@@ -112,7 +112,7 @@ export default async function VisualBuilderExperienceWrapper({
                 className="vb:node relative w-full"
                 data-epi-block-id={node.key}
               >
-                <ContentAreaMapper blocks={[node.component]} />
+                <ContentAreaMapper blocks={[node.component]} preview />
               </div>
             )
           }

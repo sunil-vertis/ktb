@@ -280,6 +280,7 @@ fragment CampaignBannerBlockFragment on CampaignBannerBlock {
 }
 
 fragment HeroBannerBlockFragment on HeroBannerBlock {
+  _id
   activeDotIndex
   _metadata {
     key
@@ -287,6 +288,7 @@ fragment HeroBannerBlockFragment on HeroBannerBlock {
   items {
     __typename
     ... on HeroBannerItem {
+      _id
       _metadata {
         key
       }

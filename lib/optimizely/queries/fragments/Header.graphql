@@ -1,0 +1,115 @@
+fragment HeaderLinkFields on HeaderLinkBlock {
+  Label
+  OpenInNewTab
+  IsActive
+  Url {
+    text
+    title
+    target
+    url {
+      default
+      base
+      hierarchical
+      internal
+    }
+  }
+}
+
+fragment HeaderMegaColumnFragment on HeaderMegaColumnBlock {
+  Links {
+    __typename
+    ... on HeaderLinkBlock {
+      ...HeaderLinkFields
+    }
+  }
+}
+
+fragment HeaderMegaSideFragment on HeaderMegaSideBlock {
+  Title
+  Columns {
+    __typename
+    ... on HeaderMegaColumnBlock {
+      ...HeaderMegaColumnFragment
+    }
+  }
+}
+
+fragment HeaderMainNavItemFragment on HeaderMainNavItemBlock {
+  Label
+  TopLevelUrl {
+    text
+    title
+    target
+    url {
+      default
+      base
+      hierarchical
+      internal
+    }
+  }
+  MegaLeft {
+    __typename
+    ... on HeaderMegaSideBlock {
+      ...HeaderMegaSideFragment
+    }
+  }
+  MegaRight {
+    __typename
+    ... on HeaderMegaSideBlock {
+      ...HeaderMegaSideFragment
+    }
+  }
+}
+
+fragment SiteHeaderBlockFragment on SiteHeaderBlock {
+  LogoAlt
+  MobilePersonaSummary
+  HomeUrl {
+    text
+    title
+    target
+    url {
+      default
+      base
+      hierarchical
+      internal
+    }
+  }
+  Logo {
+    __typename
+    ... on ImageMedia {
+      _assetMetadata {
+        url
+      }
+    }
+    ... on GenericMedia {
+      _assetMetadata {
+        url
+      }
+    }
+  }
+  UtilityLeft {
+    __typename
+    ... on HeaderLinkBlock {
+      ...HeaderLinkFields
+    }
+  }
+  UtilityRight {
+    __typename
+    ... on HeaderLinkBlock {
+      ...HeaderLinkFields
+    }
+  }
+  MobilePersonaLinks {
+    __typename
+    ... on HeaderLinkBlock {
+      ...HeaderLinkFields
+    }
+  }
+  MainNavigation {
+    __typename
+    ... on HeaderMainNavItemBlock {
+      ...HeaderMainNavItemFragment
+    }
+  }
+}

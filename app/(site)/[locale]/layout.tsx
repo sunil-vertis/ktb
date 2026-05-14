@@ -2,6 +2,7 @@ import '@/app/globals.css'
 import '@/styles/main.scss'
 import { LOCALES } from '@/lib/optimizely/utils/language'
 import { Header } from '@/components/layout/header'
+import { fetchSiteHeaderCms } from '@/components/layout/header-cms'
 import { Footer } from '@/components/layout/footer'
 
 export function generateStaticParams() {
@@ -21,13 +22,14 @@ export default async function RootLayout({
   params: Promise<{ locale: string }>
 }>) {
   const { locale } = await params
+  const headerContent = await fetchSiteHeaderCms(locale)
   return (
     <html lang={locale} className="h-full" suppressHydrationWarning>
       <body
         className="flex min-h-screen flex-col antialiased"
         suppressHydrationWarning
       >
-        <Header locale={locale} />
+        <Header locale={locale} content={headerContent} />
         <main className="min-h-0 flex-1">{children}</main>
         <Footer />
       </body>

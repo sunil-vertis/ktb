@@ -5,25 +5,23 @@ import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
+import type { HeaderCmsContent, HeaderMainNavItem, HeaderMegaSide, HeaderNavLink } from '@/components/layout/header-cms'
 import { SearchOverlay } from '@/components/layout/search-overlay'
 import { mapPathWithoutLocale } from '@/lib/optimizely/utils/language'
 
-const UTILITY_LEFT_LINKS = ['Personal', 'SME', 'Corporate', 'Krungthai Wealth']
+function cells(labels: string[]): Array<{ label: string; href: string; openInNewTab?: boolean }> {
+  return labels.map((label) => ({ label, href: '#' }))
+}
 
-const UTILITY_RIGHT_LINKS = [
+const DEFAULT_UTILITY_LEFT_LABELS = ['Personal', 'SME', 'Corporate', 'Krungthai Wealth']
+const DEFAULT_UTILITY_RIGHT_LABELS = [
   'Financial Partner',
   'Investor Relations',
   'NPA',
   'About Us',
 ]
-const MOBILE_PERSONA_LINKS = [
-  'SME',
-  'Corporate',
-  'Krungthai Wealth',
-  ...UTILITY_RIGHT_LINKS,
-]
 
-const MAIN_NAV = [
+const DEFAULT_MAIN_NAV: HeaderMainNavItem[] = [
   {
     label: 'Deposit',
     href: '#',
@@ -31,20 +29,22 @@ const MAIN_NAV = [
       left: {
         title: 'Products',
         columns: [
-          ['Current account deposit', 'Savings deposit', 'Fixed deposit', 'Tax-free deposits'],
-          [
+          cells([
+            'Current account deposit',
+            'Savings deposit',
+            'Fixed deposit',
+            'Tax-free deposits',
+          ]),
+          cells([
             'Foreign currency deposits',
             'Krungthai NEXT online deposit',
             'Paometang savings account',
-          ],
+          ]),
         ],
       },
       right: {
         title: 'Services',
-        columns: [
-          ['Krungthai payroll solution'],
-          [],
-        ],
+        columns: [cells(['Krungthai payroll solution'])],
       },
     },
   },
@@ -58,13 +58,13 @@ const MAIN_NAV = [
       left: {
         title: 'Products',
         columns: [
-          [
+          cells([
             'Krungthai PromptPay',
             'Transfer money',
             'Accept payments',
             'Currency and foreign exchange',
-          ],
-          ['Currency and foreign exchange', 'Financial guidance for studying abroad'],
+          ]),
+          cells(['Currency and foreign exchange', 'Financial guidance for studying abroad']),
         ],
       },
     },
@@ -73,13 +73,43 @@ const MAIN_NAV = [
   { label: 'E-Banking', href: '#' },
 ]
 
-function renderMegaSection(
-  side: {
-    title: string
-    columns: Array<string[]>
-  },
-  panelClassName: string
-) {
+function defaultNavLinks(labels: string[], activeFirstLeft: boolean): HeaderNavLink[] {
+  return labels.map((label, i) => ({
+    label,
+    href: '#',
+    ...(activeFirstLeft && i === 0 ? { isActive: true } : {}),
+  }))
+}
+
+const DEFAULT_HEADER_CONTENT: HeaderCmsContent = {
+  utilityLeft: defaultNavLinks(DEFAULT_UTILITY_LEFT_LABELS, true),
+  utilityRight: defaultNavLinks(DEFAULT_UTILITY_RIGHT_LABELS, false),
+  mobilePersonaSummary: 'Individual',
+  mobilePersonaLinks: defaultNavLinks(
+    ['SME', 'Corporate', 'Krungthai Wealth', ...DEFAULT_UTILITY_RIGHT_LABELS],
+    false
+  ),
+  logoSrc: '/assets/logo/sitelogo.png',
+  logoAlt: 'Krungthai logo',
+  homeHref: '/',
+  mainNav: DEFAULT_MAIN_NAV,
+}
+
+function mergeHeaderContent(cms: HeaderCmsContent | null | undefined): HeaderCmsContent {
+  if (!cms) return DEFAULT_HEADER_CONTENT
+
+  return {
+    ...cms,
+    utilityLeft: cms.utilityLeft.length ? cms.utilityLeft : DEFAULT_HEADER_CONTENT.utilityLeft,
+    utilityRight: cms.utilityRight.length ? cms.utilityRight : DEFAULT_HEADER_CONTENT.utilityRight,
+    mobilePersonaLinks: cms.mobilePersonaLinks.length
+      ? cms.mobilePersonaLinks
+      : DEFAULT_HEADER_CONTENT.mobilePersonaLinks,
+    mainNav: cms.mainNav.length ? cms.mainNav : DEFAULT_HEADER_CONTENT.mainNav,
+  }
+}
+
+function renderMegaSection(side: HeaderMegaSide, panelClassName: string) {
   return (
     <section className={`site-header__mega-panel ${panelClassName}`}>
       <h3 className="site-header__mega-title">{side.title}</h3>
@@ -88,8 +118,16 @@ function renderMegaSection(
           <div key={i} className="site-header__mega-column">
             <div className="site-header__mega-category-links">
               {column.map((link) => (
-                <Link key={link} href="#" className="site-header__mega-link" role="menuitem">
-                  {link}
+                <Link
+                  key={`${link.label}-${link.href}`}
+                  href={link.href}
+                  className="site-header__mega-link"
+                  role="menuitem"
+                  {...(link.openInNewTab || link.href.startsWith('http')
+                    ? { target: '_blank', rel: 'noopener noreferrer' }
+                    : {})}
+                >
+                  {link.label}
                 </Link>
               ))}
             </div>
@@ -180,7 +218,14 @@ function CloseIcon() {
   )
 }
 
-export function Header({ locale }: { locale: string }) {
+export function Header({
+  locale,
+  content,
+}: {
+  locale: string
+  content?: HeaderCmsContent | null
+}) {
+  const data = mergeHeaderContent(content)
   const router = useRouter()
   const pathname = usePathname()
   const initialLocale = (locale || 'en').toUpperCase()
@@ -248,20 +293,34 @@ export function Header({ locale }: { locale: string }) {
       <div className="site-header__utility">
         <div className="site-header__utility-inner container mx-auto px-4">
           <div className="site-header__utility-left">
-            {UTILITY_LEFT_LINKS.map((label, i) => (
-              <Link
-                key={label}
-                href="#"
-                className={`site-header__utility-link${i === 0 ? ' is-active' : ''}`}
-              >
-                {label}
-              </Link>
-            ))}
+            {data.utilityLeft.map((link, i) => {
+              const activeIndex = data.utilityLeft.findIndex((l) => l.isActive)
+              const isActive = activeIndex >= 0 ? i === activeIndex : i === 0
+              return (
+                <Link
+                  key={`${link.label}-${i}`}
+                  href={link.href}
+                  className={`site-header__utility-link${isActive ? ' is-active' : ''}`}
+                  {...(link.openInNewTab
+                    ? { target: '_blank', rel: 'noopener noreferrer' }
+                    : {})}
+                >
+                  {link.label}
+                </Link>
+              )
+            })}
           </div>
           <div className="site-header__utility-right">
-            {UTILITY_RIGHT_LINKS.map((label) => (
-              <Link key={label} href="#" className="site-header__utility-link">
-                {label}
+            {data.utilityRight.map((link) => (
+              <Link
+                key={link.label}
+                href={link.href}
+                className="site-header__utility-link"
+                {...(link.openInNewTab
+                  ? { target: '_blank', rel: 'noopener noreferrer' }
+                  : {})}
+              >
+                {link.label}
               </Link>
             ))}
             <span className="site-header__utility-separator" aria-hidden>
@@ -327,15 +386,20 @@ export function Header({ locale }: { locale: string }) {
         <div className="site-header__main-inner">
           <details className="site-header__mobile-menu">
             <summary className="site-header__mobile-summary">
-              <span className="site-header__brand">
+              <Link
+                href={data.homeHref}
+                className="site-header__brand"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <Image
-                  src="/assets/logo/sitelogo.png"
-                  alt="Krungthai logo"
+                  src={data.logoSrc}
+                  alt={data.logoAlt}
                   width={144}
                   height={60}
                   className="site-header__brand-image"
+                  unoptimized={data.logoSrc.startsWith('http')}
                 />
-              </span>
+              </Link>
               <span className="site-header__mobile-actions">
                 <button
                   type="button"
@@ -362,20 +426,27 @@ export function Header({ locale }: { locale: string }) {
             <div className="site-header__mobile-panel">
               <details className="site-header__mobile-persona">
                 <summary className="site-header__mobile-persona-summary">
-                  Individual
+                  {data.mobilePersonaSummary}
                   <ChevronDownIcon />
                 </summary>
                 <div className="site-header__mobile-persona-list">
-                  {MOBILE_PERSONA_LINKS.map((item) => (
-                    <Link key={item} href="#" className="site-header__mobile-persona-item">
-                      {item}
+                  {data.mobilePersonaLinks.map((item) => (
+                    <Link
+                      key={item.label}
+                      href={item.href}
+                      className="site-header__mobile-persona-item"
+                      {...(item.openInNewTab
+                        ? { target: '_blank', rel: 'noopener noreferrer' }
+                        : {})}
+                    >
+                      {item.label}
                     </Link>
                   ))}
                 </div>
               </details>
 
               <nav className="site-header__mobile-nav" aria-label="Main navigation mobile">
-                {MAIN_NAV.map((item) =>
+                {data.mainNav.map((item) =>
                   item.menu ? (
                     <div key={item.label} className="site-header__mobile-nav-group">
                       <button
@@ -392,15 +463,29 @@ export function Header({ locale }: { locale: string }) {
                           {[...item.menu.left.columns, ...(item.menu.right?.columns ?? [])]
                             .flat()
                             .map((submenuItem) => (
-                              <Link key={submenuItem} href="#" className="site-header__mobile-submenu-link">
-                                {submenuItem}
+                              <Link
+                                key={`${submenuItem.label}-${submenuItem.href}`}
+                                href={submenuItem.href}
+                                className="site-header__mobile-submenu-link"
+                                {...(submenuItem.openInNewTab || submenuItem.href.startsWith('http')
+                                  ? { target: '_blank', rel: 'noopener noreferrer' }
+                                  : {})}
+                              >
+                                {submenuItem.label}
                               </Link>
                             ))}
                         </div>
                       ) : null}
                     </div>
                   ) : (
-                    <Link key={item.label} href={item.href} className="site-header__mobile-nav-link">
+                    <Link
+                      key={item.label}
+                      href={item.href}
+                      className="site-header__mobile-nav-link"
+                      {...(item.openInNewTab
+                        ? { target: '_blank', rel: 'noopener noreferrer' }
+                        : {})}
+                    >
                       {item.label}
                     </Link>
                   )
@@ -453,18 +538,23 @@ export function Header({ locale }: { locale: string }) {
           </details>
 
           <div className="site-header__desktop-row">
-            <Link href="/" className="site-header__brand site-header__brand--desktop" aria-label="Krungthai home">
+            <Link
+              href={data.homeHref}
+              className="site-header__brand site-header__brand--desktop"
+              aria-label="Krungthai home"
+            >
               <Image
-                src="/assets/logo/sitelogo.png"
-                alt="Krungthai logo"
+                src={data.logoSrc}
+                alt={data.logoAlt}
                 width={156}
                 height={60}
                 className="site-header__brand-image"
+                unoptimized={data.logoSrc.startsWith('http')}
               />
             </Link>
 
             <nav ref={desktopNavRef} className="site-header__main-nav" aria-label="Main navigation desktop">
-              {MAIN_NAV.map((item) =>
+              {data.mainNav.map((item) =>
                 item.menu ? (
                   <div
                     key={item.label}
@@ -497,6 +587,9 @@ export function Header({ locale }: { locale: string }) {
                     href={item.href}
                     className="site-header__main-link"
                     onClick={() => setOpenMegaMenu(null)}
+                    {...(item.openInNewTab
+                      ? { target: '_blank', rel: 'noopener noreferrer' }
+                      : {})}
                   >
                     {item.label}
                   </Link>

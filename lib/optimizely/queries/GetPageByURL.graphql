@@ -8,6 +8,15 @@ query getPageByURL($locales: [Locales], $slug: String) {
       shortDescription
       keywords
       _modified
+      _metadata {
+        displayName
+        url {
+          default
+          hierarchical
+          internal
+          base
+        }
+      }
       blocks {
         ...ItemsInContentArea
       }

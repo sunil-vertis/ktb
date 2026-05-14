@@ -11,6 +11,16 @@ query getPreviewPageByURL(
     }
   ) {
     item {
+      title
+      _metadata {
+        displayName
+        url {
+          default
+          hierarchical
+          internal
+          base
+        }
+      }
       blocks {
         ...ItemsInContentArea
       }

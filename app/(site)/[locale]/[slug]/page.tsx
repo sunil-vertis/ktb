@@ -1,6 +1,7 @@
-// app/[locale]/[slug]/page.tsx
+// app/(site)/[locale]/[slug]/page.tsx
 import ContentAreaMapper from '@/components/content-area/mapper'
 import VisualBuilderExperienceWrapper from '@/components/visual-builder/wrapper'
+import { Breadcrumb } from '@/components/ui/breadcrumb'
 import { optimizely } from '@/lib/optimizely/fetch'
 import { SafeVisualBuilderExperience } from '@/lib/optimizely/types/experience'
 import {
@@ -12,6 +13,7 @@ import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { Suspense } from 'react'
 import { mapLocationsToOptions } from '@/lib/forms/utils/selection'
+import { buildCmsPageBreadcrumbItems } from '@/lib/utils/page-breadcrumbs'
 
 export async function generateMetadata(props: {
   params: Promise<{ locale: string; slug?: string }>
@@ -44,8 +46,8 @@ export async function generateMetadata(props: {
     })
 
     const experience =
-    experienceData.data?.BlankExperience?.item ||
-    experienceData.data?.SEOExperience?.item
+      experienceData.data?.BlankExperience?.item ||
+      experienceData.data?.SEOExperience?.item
 
     if (experience) {
       return {
@@ -114,7 +116,7 @@ export default async function CmsPage(props: {
 
   if (errors?.length || !data?.CMSPage?.item?._modified) {
     const experienceData = await optimizely.GetVisualBuilderBySlug({
-      locales: [locales],
+      locales,
       slug: formattedSlug,
     })
 
@@ -131,7 +133,11 @@ export default async function CmsPage(props: {
 
       return (
         <Suspense>
-          <VisualBuilderExperienceWrapper experience={experience} locationOptions={locationOptions} locale={locale}/>
+          <VisualBuilderExperienceWrapper
+            experience={experience}
+            locationOptions={locationOptions}
+            locale={locale}
+          />
         </Suspense>
       )
     }
@@ -152,8 +158,23 @@ export default async function CmsPage(props: {
     })
   }
 
+  const publishedPath =
+    page?._metadata?.url?.default?.trim() ||
+    page?._metadata?.url?.hierarchical?.trim() ||
+    page?._metadata?.url?.internal?.trim() ||
+    page?._metadata?.url?.base?.trim() ||
+    null
+
+  const breadcrumbItems = buildCmsPageBreadcrumbItems({
+    locale,
+    pageTitle: page?.title,
+    publishedPath,
+    routePath: formattedSlug,
+  })
+
   return (
     <>
+      {breadcrumbItems ? <Breadcrumb items={breadcrumbItems} /> : null}
       <Suspense>
         <ContentAreaMapper blocks={blocks} />
       </Suspense>

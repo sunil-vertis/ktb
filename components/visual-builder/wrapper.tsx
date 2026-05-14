@@ -13,20 +13,23 @@ import type {
 export default async function VisualBuilderExperienceWrapper({
   experience,
   locationOptions = [],
+  locale,
 }: {
   experience?: SafeVisualBuilderExperience
   locationOptions?: {
     label: string
     value: string
     parentValue?: string
+    parentKey?: string
   }[]
+  locale?: string
 }) {
   if (!experience?.composition?.nodes) {
     return null
   }
 
   const { nodes } = experience.composition
-  const formSettings = await getFormSettings(nodes)
+  const formSettings = await getFormSettings(nodes, locale)
   
   return (
     <div className="vb:outline relative w-full flex-1 h-full">

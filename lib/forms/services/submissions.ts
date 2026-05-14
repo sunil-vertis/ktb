@@ -32,7 +32,10 @@ export async function getAllSubmissions() {
   return results
 }
 
-export async function getEmailTemplates(formName: string) {
+export async function getEmailTemplates(
+  formName: string,
+  locale?: string
+) {
   const response = await fetch(
     `${process.env.OPTIMIZELY_API_URL}?auth=${process.env.OPTIMIZELY_SINGLE_KEY}`,
     {
@@ -52,12 +55,30 @@ export async function getEmailTemplates(formName: string) {
 
   const json = await response.json()
 
-  return {
-    customer:
-      json?.data?.CustomerEmailTemplateBlock?.items?.[0] || null,
+  const isThai =
+    locale === 'th' ||
+    locale === 'th-TH'
 
-    staff:
-      json?.data?.StaffEmailTemplateBlock?.items?.[0] || null,
+  const getLocalizedTemplate = (items: any[] = []) => {
+    const matchedItem = items.find((item: any) => {
+      const body = item?.EmailBody?.html || ''
+
+      return isThai
+        ? /[\u0E00-\u0E7F]/.test(body)
+        : !/[\u0E00-\u0E7F]/.test(body)
+    })
+
+    return matchedItem || items[0] || null
+  }
+
+  return {
+    customer: getLocalizedTemplate(
+      json?.data?.CustomerEmailTemplateBlock?.items
+    ),
+
+    staff: getLocalizedTemplate(
+      json?.data?.StaffEmailTemplateBlock?.items
+    ),
   }
 }
 

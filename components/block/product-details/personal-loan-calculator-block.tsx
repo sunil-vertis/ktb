@@ -27,7 +27,13 @@ export function formatBahtAmount(value: number): string {
   }).format(Math.round(value))
 }
 
-export type ProfessionOption = 'government' | 'private'
+/** Matches `OptionValue` from CMS `OptionBlock`; legacy demo uses `government` | `private`. */
+export type ProfessionOption = string
+
+export type LoanCalculatorProfessionChoice = {
+  label: string
+  value: string
+}
 
 export type PersonalLoanCalculatorBlockProps = {
   title?: string
@@ -44,6 +50,15 @@ export type PersonalLoanCalculatorBlockProps = {
   installmentMaxMonths?: number
   validationMessage?: string
   noteLines?: readonly string[]
+  monthlyIncomeTitle?: string
+  selectProfessionTitle?: string
+  /** From CMS `ProfessionOptions` / `OptionBlock`; falls back to two demo options when empty. */
+  professionOptions?: readonly LoanCalculatorProfessionChoice[]
+  loanAmountTitle?: string
+  installmentPeriodTitle?: string
+  calculationResultTitle?: string
+  interestRateTitle?: string
+  monthlyRepaymentAmountTitle?: string
   /** Figma radio assets (20×20). */
   radioOffIconSrc?: string
   radioOnIconSrc?: string
@@ -58,11 +73,31 @@ const DEFAULT_NOTE = [
 const GOVT_LABEL = 'Government & State Enterprise Employees'
 const PRIVATE_LABEL = 'Private sector employees'
 
+const DEFAULT_PROFESSION_OPTIONS: readonly LoanCalculatorProfessionChoice[] = [
+  { label: GOVT_LABEL, value: 'government' },
+  { label: PRIVATE_LABEL, value: 'private' },
+]
+
 const DEFAULT_RADIO_OFF = '/assets/icons/loan-calculator/radio-off.svg'
 const DEFAULT_RADIO_ON = '/assets/icons/loan-calculator/radio-on.svg'
 
 function safeDomId(id: string): string {
   return id.replace(/:/g, '')
+}
+
+function mapProfessionOptionsFromCms(
+  items: PersonalLoanCalculatorBlockFragmentFragment['ProfessionOptions']
+): LoanCalculatorProfessionChoice[] | undefined {
+  if (!items?.length) return undefined
+  const out: LoanCalculatorProfessionChoice[] = []
+  for (const item of items) {
+    if (item?.__typename === 'OptionBlock') {
+      const label = item.OptionText?.trim()
+      const value = item.OptionValue?.trim()
+      if (label && value) out.push({ label, value })
+    }
+  }
+  return out.length ? out : undefined
 }
 
 export function PersonalLoanCalculatorBlockFE({
@@ -79,6 +114,14 @@ export function PersonalLoanCalculatorBlockFE({
   installmentMaxMonths = 60,
   validationMessage = 'Please specify an amount with limit maximum 5 times of your monthly income',
   noteLines = DEFAULT_NOTE,
+  monthlyIncomeTitle = 'Monthly income',
+  selectProfessionTitle = 'Select your profession',
+  professionOptions,
+  loanAmountTitle = 'Loan amount',
+  installmentPeriodTitle = 'Installment period',
+  calculationResultTitle = 'Calculation Result',
+  interestRateTitle = 'Interest rate',
+  monthlyRepaymentAmountTitle = 'Monthly repayment amount',
   radioOffIconSrc = DEFAULT_RADIO_OFF,
   radioOnIconSrc = DEFAULT_RADIO_ON,
 }: PersonalLoanCalculatorBlockProps) {
@@ -88,11 +131,25 @@ export function PersonalLoanCalculatorBlockFE({
   const loanId = safeDomId(React.useId())
   const monthsId = safeDomId(React.useId())
 
+  const resolvedProfessionOptions = React.useMemo(() => {
+    const fromProps =
+      professionOptions?.filter((o) => o.label?.trim() && o.value?.trim()) ?? []
+    return fromProps.length > 0 ? fromProps : [...DEFAULT_PROFESSION_OPTIONS]
+  }, [professionOptions])
+
   const [income, setIncome] = React.useState(120_000)
   const [loanAmount, setLoanAmount] = React.useState(100_000)
   const [months, setMonths] = React.useState(60)
-  const [profession, setProfession] =
-    React.useState<ProfessionOption>('government')
+  const [profession, setProfession] = React.useState(
+    () => resolvedProfessionOptions[0]?.value ?? 'government'
+  )
+
+  React.useEffect(() => {
+    const first = resolvedProfessionOptions[0]?.value ?? 'government'
+    setProfession((prev) =>
+      resolvedProfessionOptions.some((o) => o.value === prev) ? prev : first
+    )
+  }, [resolvedProfessionOptions])
 
   const maxLoanByIncome = income * 5
   const loanExceedsLimit = loanAmount > maxLoanByIncome
@@ -143,59 +200,42 @@ export function PersonalLoanCalculatorBlockFE({
             id={professionGroupTitleId}
             className="personal-loan-calculator__fieldset-title type-body-large-medium"
           >
-            Select your profession
+            {selectProfessionTitle}
           </p>
           <div className="personal-loan-calculator__radios">
-            <label className="personal-loan-calculator__radio-label">
-              <input
-                type="radio"
-                className="personal-loan-calculator__radio-input"
-                name="plc-profession"
-                checked={profession === 'government'}
-                onChange={() => setProfession('government')}
-              />
-              <span className="personal-loan-calculator__radio-graphic" aria-hidden>
-                <Image
-                  className="personal-loan-calculator__radio-img"
-                  src={
-                    profession === 'government' ? radioOnIconSrc : radioOffIconSrc
-                  }
-                  alt=""
-                  width={20}
-                  height={20}
-                  unoptimized
-                  sizes="20px"
+            {resolvedProfessionOptions.map((opt) => (
+              <label
+                key={opt.value}
+                className="personal-loan-calculator__radio-label"
+              >
+                <input
+                  type="radio"
+                  className="personal-loan-calculator__radio-input"
+                  name="plc-profession"
+                  checked={profession === opt.value}
+                  onChange={() => setProfession(opt.value)}
                 />
-              </span>
-              <span className="personal-loan-calculator__radio-text type-body-large-medium">
-                {GOVT_LABEL}
-              </span>
-            </label>
-            <label className="personal-loan-calculator__radio-label">
-              <input
-                type="radio"
-                className="personal-loan-calculator__radio-input"
-                name="plc-profession"
-                checked={profession === 'private'}
-                onChange={() => setProfession('private')}
-              />
-              <span className="personal-loan-calculator__radio-graphic" aria-hidden>
-                <Image
-                  className="personal-loan-calculator__radio-img"
-                  src={
-                    profession === 'private' ? radioOnIconSrc : radioOffIconSrc
-                  }
-                  alt=""
-                  width={20}
-                  height={20}
-                  unoptimized
-                  sizes="20px"
-                />
-              </span>
-              <span className="personal-loan-calculator__radio-text type-body-large-medium">
-                {PRIVATE_LABEL}
-              </span>
-            </label>
+                <span
+                  className="personal-loan-calculator__radio-graphic"
+                  aria-hidden
+                >
+                  <Image
+                    className="personal-loan-calculator__radio-img"
+                    src={
+                      profession === opt.value ? radioOnIconSrc : radioOffIconSrc
+                    }
+                    alt=""
+                    width={20}
+                    height={20}
+                    unoptimized
+                    sizes="20px"
+                  />
+                </span>
+                <span className="personal-loan-calculator__radio-text type-body-large-medium">
+                  {opt.label}
+                </span>
+              </label>
+            ))}
           </div>
         </fieldset>
 
@@ -206,7 +246,7 @@ export function PersonalLoanCalculatorBlockFE({
                 className="personal-loan-calculator__slider-label type-body-large-medium"
                 id={`${incomeId}-label`}
               >
-                Monthly income
+                {monthlyIncomeTitle}
               </span>
               <div className="personal-loan-calculator__value-field">
                 <span className="personal-loan-calculator__value-num type-heading-h3">
@@ -243,7 +283,7 @@ export function PersonalLoanCalculatorBlockFE({
                 className="personal-loan-calculator__slider-label type-body-large-medium"
                 id={`${loanId}-label`}
               >
-                Loan amount
+                {loanAmountTitle}
               </span>
               <div className="personal-loan-calculator__value-field">
                 <span className="personal-loan-calculator__value-num type-heading-h3">
@@ -296,7 +336,7 @@ export function PersonalLoanCalculatorBlockFE({
                 className="personal-loan-calculator__slider-label type-body-large-medium"
                 id={`${monthsId}-label`}
               >
-                Installment period
+                {installmentPeriodTitle}
               </span>
               <div className="personal-loan-calculator__value-field">
                 <span className="personal-loan-calculator__value-num type-heading-h3">
@@ -330,14 +370,14 @@ export function PersonalLoanCalculatorBlockFE({
 
         <div className="personal-loan-calculator__results">
           <p className="personal-loan-calculator__results-title type-body-large-medium">
-            Calculation Result
+            {calculationResultTitle}
           </p>
 
           <div className="personal-loan-calculator__results-grid">
             <div className="personal-loan-calculator__results-row personal-loan-calculator__results-row--pair">
               <div className="personal-loan-calculator__result-card personal-loan-calculator__result-card--muted">
                 <p className="personal-loan-calculator__result-label type-body-small-regular">
-                  Loan amount
+                  {loanAmountTitle}
                 </p>
                 <div className="personal-loan-calculator__value-field">
                   <span className="personal-loan-calculator__value-num type-heading-h3">
@@ -350,7 +390,7 @@ export function PersonalLoanCalculatorBlockFE({
               </div>
               <div className="personal-loan-calculator__result-card personal-loan-calculator__result-card--muted">
                 <p className="personal-loan-calculator__result-label type-body-small-regular">
-                  Interest rate
+                  {interestRateTitle}
                 </p>
                 <p className="personal-loan-calculator__result-highlight type-heading-h3">
                   {interestPercentLabel}
@@ -360,7 +400,7 @@ export function PersonalLoanCalculatorBlockFE({
 
             <div className="personal-loan-calculator__result-card personal-loan-calculator__result-card--accent">
               <p className="personal-loan-calculator__result-label type-body-small-regular">
-                Monthly repayment amount
+                {monthlyRepaymentAmountTitle}
               </p>
               <div className="personal-loan-calculator__value-field">
                 {monthlyPayment != null ? (
@@ -409,10 +449,22 @@ export default function PersonalLoanCalculatorBlock(
     annualInterestRate = annualInterestRate / 100
   }
 
+  const professionOptions = mapProfessionOptionsFromCms(props.ProfessionOptions)
+
   return (
     <PersonalLoanCalculatorBlockFE
       title={props.Title ?? undefined}
       subtitle={props.Subtitle ?? undefined}
+      monthlyIncomeTitle={props.MonthlyIncomeTitle ?? undefined}
+      selectProfessionTitle={props.SelectProfessionTitle ?? undefined}
+      professionOptions={professionOptions}
+      loanAmountTitle={props.LoanAmountTitle ?? undefined}
+      installmentPeriodTitle={props.InstallmentPeriodTitle ?? undefined}
+      calculationResultTitle={props.CalculationResultTitle ?? undefined}
+      interestRateTitle={props.InterestRateTitle ?? undefined}
+      monthlyRepaymentAmountTitle={
+        props.MonthlyRepaymentAmountTitle ?? undefined
+      }
       annualInterestRate={annualInterestRate}
       incomeMin={props.IncomeMin ?? undefined}
       incomeMax={props.IncomeMax ?? undefined}

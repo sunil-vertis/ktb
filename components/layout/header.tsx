@@ -323,7 +323,7 @@ export function Header({ locale }: { locale: string }) {
         </div>
       </div>
 
-      <div className="site-header__main container mx-auto px-4">
+      <div className="site-header__main container mx-auto px-0 lg:px-4">
         <div className="site-header__main-inner">
           <details className="site-header__mobile-menu">
             <summary className="site-header__mobile-summary">

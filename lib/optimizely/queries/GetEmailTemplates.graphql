@@ -12,6 +12,7 @@ query GetEmailTemplates($formName: String) {
       _metadata {
         key
         displayName
+        locale
       }
       Subject
       FromEmail

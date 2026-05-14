@@ -37,17 +37,21 @@ export function buildEmailHtml({
   body,
   fields,
   referenceNumber,
+  locale,
 }: {
   body?: string
   fields: Record<string, any>
   referenceNumber: string
+  locale?: string
 }) {
+  const isThai = locale === 'th' || locale === 'th-TH'
+
   const templatePath = path.join(
     process.cwd(),
     'lib',
     'forms',
     'templates',
-    'base-template.html'
+    isThai ? 'base-template-th.html' : 'base-template.html'
   )
 
   let html = fs.readFileSync(templatePath, 'utf8')
@@ -63,7 +67,7 @@ export function buildEmailHtml({
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
                 <tr>
                   <td style="font-family:'Prompt', Arial, Helvetica, sans-serif; font-size:20px; font-weight:500; line-height:1.3; color:#002533;">
-                    Submitted details:
+                    ${isThai ? 'รายละเอียดที่ส่ง:' : 'Submitted details:'}
                   </td>
                 </tr>
               </table>
@@ -148,7 +152,7 @@ export async function sendEmail({
 
   try {
     await sgMail.send({
-      to,
+      to: Array.isArray(to) ? to : parseEmails(to),
       from: from || config.fromEmail!,
       cc: parseEmails(cc),
       subject,

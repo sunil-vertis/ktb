@@ -44,6 +44,7 @@ export default function SubmitElement({
 
     try {
       setIsSubmitting(true)
+      const locale = typeof window !== 'undefined' && window.location.pathname.includes('/th/') ? 'th' : 'en'
 
       const response = await fetch('/api/form-submissions', {
         method: 'POST',
@@ -51,6 +52,7 @@ export default function SubmitElement({
         body: JSON.stringify({
           formName: 'Registration Form',
           fields: formState,
+          locale,
         }),
       })
 

@@ -16,6 +16,7 @@ const getCustomerEmail = (fields: Record<string, any>) => {
     fields['email'] ||
     fields['EmailAddress'] ||
     fields['emailAddress'] ||
+    fields['ที่อยู่อีเมล'] ||
     ''
   )
 }
@@ -23,7 +24,7 @@ const getCustomerEmail = (fields: Record<string, any>) => {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { formName, fields } = body
+    const { formName, fields, locale } = body
 
     if (!formName || !fields) {
       return NextResponse.json(
@@ -45,18 +46,19 @@ export async function POST(request: NextRequest) {
     }
 
     const blobName = await saveSubmission(submissionRecord)
-    const templates = await getEmailTemplates(formName)
+    const templates = await getEmailTemplates(formName, locale)
 
     const emailResults = []
 
     if (templates.customer) {
       const customerEmail = getCustomerEmail(fields)
-      const fname = fields['First name'] 
-                  || fields['FirstName'] 
-                  || fields['firstname'] 
-                  || fields['name'] 
-                  || fields['Name'] 
-                  || 'Customer';
+      const fname = fields['First name'] ||
+                    fields['FirstName'] ||
+                    fields['firstname'] ||
+                    fields['name'] ||
+                    fields['Name'] ||
+                    fields['ชื่อจริง'] ||
+                    'Customer'
 
       let customerEmailBody = templates.customer.EmailBody?.html || ''
 
@@ -75,6 +77,7 @@ export async function POST(request: NextRequest) {
               body: customerEmailBody,
               fields,
               referenceNumber,
+              locale,
             }),
           })
         )
@@ -95,6 +98,7 @@ export async function POST(request: NextRequest) {
           body: staffEmailBody,
           fields,
           referenceNumber,
+          locale,
         }),
       })
     )

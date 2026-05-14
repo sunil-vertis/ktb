@@ -409,6 +409,28 @@ fragment CardListingBlockFragment on CardListingBlock {
   }
 }
 
+fragment applicationCardBlock on ApplicationCardBlock {
+  __typename
+  _metadata {
+    key
+    types
+  }
+  Heading
+  Description
+  ApplicationLink {
+    url {
+      default
+    }
+    title
+    target
+  }
+  QRImage {
+    url {
+      default
+    }
+  }
+}
+
 fragment ItemsInContentArea on _IContent {
   __typename
   ...HeroBlockFragment
@@ -431,6 +453,7 @@ fragment ItemsInContentArea on _IContent {
   ...EligibilitySummaryBlockFragment
   ...ProductHighlightsBlockFragment
   ...PersonalLoanCalculatorBlockFragment
+  ...OptionBlockFragment
   ...LoanInterestRatesSectionBlockFragment
   ...LoanLimitGrantedSectionBlockFragment
   ...LoanCalculationExamplesSectionBlockFragment
@@ -443,6 +466,7 @@ fragment ItemsInContentArea on _IContent {
   ...StickySideBarBlockFragment
   ...ProductDetailsAnchorTabsBlockFragment
   ...ProductDetailsPageBlockFragment
+  ...applicationCardBlock
 
   ... on OptiFormsTextboxElement {
     _metadata {

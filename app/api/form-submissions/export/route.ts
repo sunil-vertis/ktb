@@ -104,7 +104,7 @@ export async function GET(request: NextRequest) {
       ),
     ]
 
-    const csv = rows.join('\n')
+    const csv = `\uFEFF${rows.join('\n')}`
 
     return new NextResponse(csv, {
       headers: {

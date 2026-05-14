@@ -6,12 +6,16 @@ query GetFormByKey($displayName: String) {
       _metadata {
         key
         displayName
+        locale
       }
       Title
       Description
       SubmitConfirmationMessage
       ResetConfirmationMessage
       ShowSummaryMessageAfterSubmission
+      PromotionBlock {
+        key
+      }
       SubmitUrl {
         default
       }

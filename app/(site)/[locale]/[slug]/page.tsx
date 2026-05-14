@@ -131,7 +131,7 @@ export default async function CmsPage(props: {
 
       return (
         <Suspense>
-          <VisualBuilderExperienceWrapper experience={experience} locationOptions={locationOptions}/>
+          <VisualBuilderExperienceWrapper experience={experience} locationOptions={locationOptions} locale={locale}/>
         </Suspense>
       )
     }

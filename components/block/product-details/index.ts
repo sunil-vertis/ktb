@@ -32,6 +32,7 @@ export {
 export type {
   PersonalLoanCalculatorBlockProps,
   ProfessionOption,
+  LoanCalculatorProfessionChoice,
 } from './personal-loan-calculator-block'
 export type { ProductDetailsConditionsBlockProps } from './product-details-conditions-block'
 export type {

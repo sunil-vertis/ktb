@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import CompositionNodeRenderer from '@/components/forms/composition-node-renderer'
+import ApplicationCardBlock from '@/components/block/application-card-block'
 
 const decodeHtmlEntities = (value: string) => {
   return value
@@ -199,7 +200,6 @@ export default function OptimizelyFormRenderer(props: any) {
       <section className="registration-block">
         <div className="registration-block__container">
           <StepIndicator currentStep={stepTitles.length} steps={stepTitles} />
-
           <div className="registration-block__card registration-block__card--plain">
             <div className="registration-block__confirmation-card">
               <div className="registration-block__success-circle">
@@ -217,6 +217,11 @@ export default function OptimizelyFormRenderer(props: any) {
                 }}
               />
             </div>
+            {props?.ShowThisPromotion && props?.PromotionBlock && (
+              <div className="registration-block__promotion">
+                <ApplicationCardBlock {...props.PromotionBlock} />
+              </div>
+            )}
           </div>
         </div>
       </section>

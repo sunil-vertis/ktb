@@ -49,6 +49,11 @@ fragment ProductHighlightsBlockFragment on ProductHighlightsBlock {
   }
 }
 
+fragment OptionBlockFragment on OptionBlock {
+  OptionText
+  OptionValue
+}
+
 fragment PersonalLoanCalculatorBlockFragment on PersonalLoanCalculatorBlock {
   Title
   Subtitle
@@ -69,6 +74,19 @@ fragment PersonalLoanCalculatorBlockFragment on PersonalLoanCalculatorBlock {
   RadioOnIconSrc {
     ...MediaUrlFields
   }
+  MonthlyIncomeTitle
+  SelectProfessionTitle
+  ProfessionOptions {
+    __typename
+    ... on OptionBlock {
+      ...OptionBlockFragment
+    }
+  }
+  LoanAmountTitle
+  InstallmentPeriodTitle
+  CalculationResultTitle
+  InterestRateTitle
+  MonthlyRepaymentAmountTitle
 }
 
 fragment LoanInterestRatesTableRowBlockFragment on LoanInterestRatesTableRowBlock {
@@ -83,7 +101,12 @@ fragment LoanInterestRatesTableRowBlockFragment on LoanInterestRatesTableRowBloc
 fragment LoanInterestRatesSectionBlockFragment on LoanInterestRatesSectionBlock {
   Title
   Introduction
-  columnHeadersList: ColumnHeaders
+  columnHeadersList: ColumnHeaders {
+    __typename
+    ... on OptionBlock {
+      ...OptionBlockFragment
+    }
+  }
   Footnote
   Rows {
     __typename

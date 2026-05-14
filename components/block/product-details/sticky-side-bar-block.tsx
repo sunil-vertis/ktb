@@ -7,8 +7,16 @@ import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 
 import type { StickySideBarBlockFragmentFragment } from '@/lib/optimizely/types/generated'
+import {
+  getKrungthaiNextStoreUrl,
+  KRUNGTHAI_NEXT_PLAY_STORE_URL,
+  shouldOpenKrungthaiNextModal,
+} from '@/lib/product-details/krungthai-next-store-url'
 
+import { KrungthaiNextDownloadModal } from './krungthai-next-download-modal'
 import { linkToAbsoluteUrl } from './map-cms'
+
+const DEFAULT_NEXT_MODAL_IMAGE = '/assets/product-details/sticky-sidebar/krungthai-next-modal-hero.png'
 
 export type StickySideBarBlockProps = {
   interestLabel?: string
@@ -18,12 +26,17 @@ export type StickySideBarBlockProps = {
   primaryCtaLabel?: string
   secondaryCtaLabel?: string
   primaryCtaHref?: string
+  /** Ignored for navigation: secondary CTA opens the NEXT modal on desktop or store links on mobile. */
   secondaryCtaHref?: string
   onPrimaryClick?: () => void
   onSecondaryClick?: () => void
   trustLabel?: string
   complianceLabel?: string
   className?: string
+  /** Modal body (desktop). Title uses {@link secondaryCtaLabel}. */
+  nextModalDescription?: string
+  nextModalImageSrc?: string
+  nextModalImageAlt?: string
 }
 
 export function StickySideBarBlockFE({
@@ -34,13 +47,40 @@ export function StickySideBarBlockFE({
   primaryCtaLabel = 'Apply for a loan',
   secondaryCtaLabel = 'Apply with Krungthai NEXT',
   primaryCtaHref,
-  secondaryCtaHref,
   onPrimaryClick,
   onSecondaryClick,
   trustLabel = 'Certified Protection',
   complianceLabel = 'DPA PROTECTING YOUR DEPOSITS',
   className,
+  nextModalDescription = 'Get real-time notifications and manage your banking needs in one secure place.',
+  nextModalImageSrc = DEFAULT_NEXT_MODAL_IMAGE,
+  nextModalImageAlt = 'Krungthai NEXT QR code',
 }: StickySideBarBlockProps) {
+  const [nextModalOpen, setNextModalOpen] = React.useState(false)
+  const [storeHref, setStoreHref] = React.useState(KRUNGTHAI_NEXT_PLAY_STORE_URL)
+
+  React.useLayoutEffect(() => {
+    setStoreHref(getKrungthaiNextStoreUrl())
+  }, [])
+
+  const onSecondaryActivate = React.useCallback(
+    (e: React.MouseEvent<HTMLAnchorElement>) => {
+      if (shouldOpenKrungthaiNextModal()) {
+        e.preventDefault()
+        onSecondaryClick?.()
+        setNextModalOpen(true)
+        return
+      }
+      onSecondaryClick?.()
+      const url = getKrungthaiNextStoreUrl()
+      if (url !== e.currentTarget.getAttribute('href')) {
+        e.preventDefault()
+        window.location.href = url
+      }
+    },
+    [onSecondaryClick]
+  )
+
   return (
     <aside className={clsx('sticky-side-bar', className)} aria-label="Product CTA">
       <div className="sticky-side-bar__head">
@@ -76,26 +116,20 @@ export function StickySideBarBlockFE({
             {primaryCtaLabel}
           </Button>
         )}
-        {secondaryCtaHref ? (
-          <Button
-            hierarchy="secondary"
-            size="lg"
-            className="sticky-side-bar__action-btn sticky-side-bar__action-btn--secondary"
-            asChild
-          >
-            <a href={secondaryCtaHref}>{secondaryCtaLabel}</a>
-          </Button>
-        ) : (
-          <Button
-            hierarchy="secondary"
-            size="lg"
-            className="sticky-side-bar__action-btn sticky-side-bar__action-btn--secondary"
-            onClick={onSecondaryClick}
-            type="button"
+        <Button
+          hierarchy="secondary"
+          size="lg"
+          className="sticky-side-bar__action-btn sticky-side-bar__action-btn--secondary"
+          asChild
+        >
+          <a
+            href={storeHref}
+            rel="noopener noreferrer"
+            onClick={onSecondaryActivate}
           >
             {secondaryCtaLabel}
-          </Button>
-        )}
+          </a>
+        </Button>
       </div>
 
       <div className="sticky-side-bar__trust-row">
@@ -121,6 +155,15 @@ export function StickySideBarBlockFE({
           unoptimized
         />
       </div>
+
+      <KrungthaiNextDownloadModal
+        open={nextModalOpen}
+        onClose={() => setNextModalOpen(false)}
+        title={secondaryCtaLabel}
+        description={nextModalDescription}
+        imageSrc={nextModalImageSrc}
+        imageAlt={nextModalImageAlt}
+      />
     </aside>
   )
 }
@@ -130,9 +173,6 @@ type CmsStickySideBarProps = Omit<StickySideBarBlockFragmentFragment, '__typenam
 export default function StickySideBarBlock(props: CmsStickySideBarProps) {
   const primaryCtaHref = linkToAbsoluteUrl(
     props.PrimaryCtaUrl as Parameters<typeof linkToAbsoluteUrl>[0]
-  )
-  const secondaryCtaHref = linkToAbsoluteUrl(
-    props.SecondaryCtaUrl as Parameters<typeof linkToAbsoluteUrl>[0]
   )
 
   return (
@@ -144,7 +184,6 @@ export default function StickySideBarBlock(props: CmsStickySideBarProps) {
       primaryCtaLabel={props.PrimaryCtaLabel ?? undefined}
       secondaryCtaLabel={props.SecondaryCtaLabel ?? undefined}
       primaryCtaHref={primaryCtaHref}
-      secondaryCtaHref={secondaryCtaHref}
       trustLabel={props.TrustLabel ?? undefined}
       complianceLabel={props.ComplianceLabel ?? undefined}
     />

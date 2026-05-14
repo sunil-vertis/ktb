@@ -137,9 +137,18 @@ export default function LoanInterestRatesSection(
   props: CmsLoanInterestRatesSectionProps
 ) {
   const columnHeaders =
-    props.columnHeadersList?.filter(
-      (h): h is string => typeof h === 'string' && h.length > 0
-    ) ?? undefined
+    props.columnHeadersList
+      ?.map((item) => {
+        if (item?.__typename === 'OptionBlock') {
+          return (
+            item.OptionText?.trim() ||
+            item.OptionValue?.trim() ||
+            ''
+          )
+        }
+        return ''
+      })
+      .filter((h) => h.length > 0) ?? undefined
 
   const rows =
     props.Rows?.map((r) => {

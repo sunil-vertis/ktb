@@ -5,8 +5,13 @@ import { useEffect, useId, useState } from 'react'
 import { Navigation, Pagination } from 'swiper/modules'
 import { Swiper, SwiperSlide } from 'swiper/react'
 
+import {
+  linkToAbsoluteUrl,
+  richTextToPlainLines,
+} from '@/components/block/product-details/map-cms'
 import { GlobalIcon } from '@/components/ui/global-icon'
 import { TextLink } from '@/components/ui/text-link'
+import type { RecommendedCarouselBlockFragmentFragment } from '@/lib/optimizely/types/generated'
 
 import styles from '@/styles/components/recommended-carousel-block.module.scss'
 
@@ -27,7 +32,8 @@ export type RecommendedCarouselBlockProps = {
   backgroundColor?: string
 }
 
-export default function RecommendedCarouselBlock({
+/** Presentational carousel (Storybook / sample preview). CMS pages use the default export. */
+export function RecommendedCarouselView({
   title = 'Related products',
   items,
   backgroundColor = 'var(--bg-bg-1, #e6f4fa)',
@@ -153,5 +159,86 @@ export default function RecommendedCarouselBlock({
         </div>
       </div>
     </section>
+  )
+}
+
+// --- CMS (Optimizely) -------------------------------------------------------
+
+type RecommendedCarouselCmsProps = Omit<
+  RecommendedCarouselBlockFragmentFragment,
+  '__typename'
+>
+
+type CarouselItemCms = Extract<
+  NonNullable<NonNullable<RecommendedCarouselBlockFragmentFragment['Items']>[number]>,
+  { __typename: 'RecommendedCarouselItemBlock' }
+>
+
+function imageSrcFromCms(image: CarouselItemCms['Image']): string | undefined {
+  if (!image) return undefined
+  if (image.__typename === 'ImageMedia' || image.__typename === 'GenericMedia') {
+    const u = image._assetMetadata?.url?.trim()
+    return u || undefined
+  }
+  return undefined
+}
+
+function descriptionPlain(row: CarouselItemCms): string {
+  const html = row.carouselDescription?.html?.trim()
+  if (!html) return ''
+  const lines = richTextToPlainLines(html)
+  return lines?.length ? lines.join(' ') : ''
+}
+
+function badgeVariantFromCms(value: string | null | undefined): 'primary' | 'highlight' {
+  const v = value?.trim().toLowerCase() ?? ''
+  if (v.includes('highlight')) return 'highlight'
+  return 'primary'
+}
+
+function mapCmsItems(
+  rows: RecommendedCarouselCmsProps['Items'] | undefined
+): RecommendedCarouselItem[] {
+  if (!rows?.length) return []
+  const out: RecommendedCarouselItem[] = []
+  let index = 0
+  for (const raw of rows) {
+    if (raw?.__typename !== 'RecommendedCarouselItemBlock') continue
+    const title = raw.Title?.trim()
+    if (!title) continue
+    const imageSrc = imageSrcFromCms(raw.Image) ?? '/placeholder.svg'
+    const id = raw.Id?.trim() || `recommended-carousel-${index}`
+    const description = descriptionPlain(raw)
+    const badgeLabel = raw.BadgeLabel?.trim() || undefined
+    const badgeVariant = raw.BadgeVariant?.trim()
+      ? badgeVariantFromCms(raw.BadgeVariant)
+      : undefined
+    const ctaLabel = raw.CtaLabel?.trim() || undefined
+    const ctaHref = linkToAbsoluteUrl(raw.CtaHref ?? undefined)?.trim() || undefined
+
+    out.push({
+      id,
+      title,
+      description,
+      imageSrc,
+      ...(badgeLabel ? { badgeLabel, badgeVariant: badgeVariant ?? 'primary' } : {}),
+      ...(ctaLabel && ctaHref ? { ctaLabel, ctaHref } : {}),
+    })
+    index += 1
+  }
+  return out
+}
+
+/** Optimizely `RecommendedCarouselBlock` from page queries. */
+export default function RecommendedCarouselBlock(props: RecommendedCarouselCmsProps) {
+  const items = mapCmsItems(props.Items)
+  if (!items.length) return null
+
+  return (
+    <RecommendedCarouselView
+      title={props.Title?.trim() || undefined}
+      items={items}
+      backgroundColor={props.BackgroundColor?.trim() || undefined}
+    />
   )
 }

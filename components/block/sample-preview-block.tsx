@@ -9,7 +9,7 @@ import StepsSectionBlock from './steps-section-block'
 import FaqSectionBlock from './faq-section-block'
 import FeatureProductCarouselBlock from './feature-product-carousel-block'
 import ArticleCarouselBlock from './article-carousel-block'
-import RecommendedCarouselBlock from './recommended-carousel-block'
+import { RecommendedCarouselView } from './recommended-carousel-block'
 import { PromoHighlightsBlockFE } from './promo-highlights-block'
 import ProductListingBlock from './product-listing-block'
 
@@ -379,7 +379,7 @@ export default function SamplePreviewBlock({}: SamplePreviewBlockProps) {
         items={featuredProductItems}
         backgroundColor="var(--neutral-050, #f7f7f7)"
       />
-      <RecommendedCarouselBlock
+      <RecommendedCarouselView
         items={recommendedItems}
         backgroundColor="var(--bg-bg-1, #e6f4fa)"
       />

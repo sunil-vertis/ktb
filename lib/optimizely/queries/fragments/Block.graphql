@@ -82,6 +82,52 @@ fragment BannerStripBlockFragment on BannerStripBlock {
   closeAriaLabel
 }
 
+fragment RecommendedCarouselItemBlockFragment on RecommendedCarouselItemBlock {
+  Id
+  Title
+  carouselDescription: Description {
+    html
+  }
+  BadgeLabel
+  BadgeVariant
+  CtaLabel
+  CtaHref {
+    text
+    title
+    target
+    url {
+      default
+      base
+      hierarchical
+      internal
+    }
+  }
+  Image {
+    __typename
+    ... on ImageMedia {
+      _assetMetadata {
+        url
+      }
+    }
+    ... on GenericMedia {
+      _assetMetadata {
+        url
+      }
+    }
+  }
+}
+
+fragment RecommendedCarouselBlockFragment on RecommendedCarouselBlock {
+  Title
+  BackgroundColor
+  Items {
+    __typename
+    ... on RecommendedCarouselItemBlock {
+      ...RecommendedCarouselItemBlockFragment
+    }
+  }
+}
+
 fragment KeyFeatureBlockFragment on KeyFeatureBlock {
   Title
   Items {
@@ -444,6 +490,7 @@ fragment ItemsInContentArea on _IContent {
   ...StoryBlockFragment
   ...BannerStripBlockFragment
   ...KeyFeatureBlockFragment
+  ...RecommendedCarouselBlockFragment
   ...PromoHighlightsBlockFragment
   ...CtaSectionBlockFragment
   ...QuickLinkBlockFragment

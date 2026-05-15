@@ -68,6 +68,9 @@ const ProductDetailsPageBlock = dynamic(
   () => import('../block/product-details/product-details-page-block')
 )
 const ApplicationCardBlock = dynamic(() => import('../block/application-card-block'))
+const RecommendedCarouselBlock = dynamic(
+  () => import('../block/recommended-carousel-block')
+)
 
 // Map the dynamically imported blocks
 export const blocks = {
@@ -105,6 +108,7 @@ export const blocks = {
   ProductDetailsAnchorTabsBlock: ProductDetailsAnchorTabsCmsBlock,
   ProductDetailsPageBlock,
   ApplicationCardBlock,
+  RecommendedCarouselBlock,
 } as const
 
 export type BlockTypeName = keyof typeof blocks

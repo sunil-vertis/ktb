@@ -5,7 +5,7 @@ import { CampaignBannerBlockFE } from './campaign-banner-block'
 import { QuickLinkBlockFE } from './quick-link-block'
 import { CtaSectionBlockFE } from './cta-section-block'
 import { KeyFeatureBlockFE } from './key-feature-block'
-import StepsSectionBlock from './steps-section-block'
+import { StepsSectionView } from './steps-section-block'
 import FaqSectionBlock from './faq-section-block'
 import FeatureProductCarouselBlock from './feature-product-carousel-block'
 import ArticleCarouselBlock from './article-carousel-block'
@@ -357,19 +357,19 @@ export default function SamplePreviewBlock({}: SamplePreviewBlockProps) {
 
       <QuickLinkBlockFE />
       <KeyFeatureBlockFE />
-      <StepsSectionBlock
+      <StepsSectionView
         title="Debit Card Application Process"
         items={stepsItems3}
         desktopColumns={3}
         backgroundColor="var(--bg-bg-1, #e6f4fa)"
       />
-      <StepsSectionBlock
+      <StepsSectionView
         title="Debit Card Application Process"
         items={stepsItems4}
         desktopColumns={4}
         backgroundColor="var(--bg-bg-2, #c0e4f2)"
       />
-      <StepsSectionBlock
+      <StepsSectionView
         title="Debit Card Application Process"
         items={stepsItems2}
         desktopColumns={2}

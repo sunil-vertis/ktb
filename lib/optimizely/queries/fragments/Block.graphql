@@ -128,6 +128,11 @@ fragment RecommendedCarouselBlockFragment on RecommendedCarouselBlock {
   }
 }
 
+fragment StepsSectionBlockFragment on StepsSectionBlock {
+  Title
+  BackgroundColor
+}
+
 fragment KeyFeatureBlockFragment on KeyFeatureBlock {
   Title
   Items {
@@ -491,6 +496,7 @@ fragment ItemsInContentArea on _IContent {
   ...BannerStripBlockFragment
   ...KeyFeatureBlockFragment
   ...RecommendedCarouselBlockFragment
+  ...StepsSectionBlockFragment
   ...PromoHighlightsBlockFragment
   ...CtaSectionBlockFragment
   ...QuickLinkBlockFragment

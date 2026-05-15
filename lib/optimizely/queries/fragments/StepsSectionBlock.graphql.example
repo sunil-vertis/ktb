@@ -1,0 +1,35 @@
+# -----------------------------------------------------------------------------
+# Your Optimizely model currently exposes only `Title` and `BackgroundColor` on
+# `StepsSectionBlock` (no list of steps yet). The app uses built-in default step
+# copy until you add the properties below and merge this fragment into Block.graphql.
+#
+# Add to `StepsSectionBlock` in the CMS (then sync / publish schema):
+#   - DesktopColumns — Integer (allowed values 2, 3, or 4)
+#   — Items — Local block list / content area, allowed type: `StepsSectionItemBlock` only
+#
+# Add to `StepsSectionItemBlock` (already have Description):
+#   — Description as XHTML/Rich text (queried as `stepDescription` alias below)
+#
+# Then in Block.graphql:
+#   1. Replace the small `fragment StepsSectionBlockFragment` with the two fragments below.
+#   2. Keep `...StepsSectionBlockFragment` inside `ItemsInContentArea`.
+#   3. Run: npm run gen-types
+# -----------------------------------------------------------------------------
+
+fragment StepsSectionItemBlockFragment on StepsSectionItemBlock {
+  stepDescription: Description {
+    html
+  }
+}
+
+fragment StepsSectionBlockFragment on StepsSectionBlock {
+  Title
+  BackgroundColor
+  DesktopColumns
+  Items {
+    __typename
+    ... on StepsSectionItemBlock {
+      ...StepsSectionItemBlockFragment
+    }
+  }
+}

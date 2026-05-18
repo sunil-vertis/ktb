@@ -1,7 +1,9 @@
 'use client'
 
+import { usePathname } from 'next/navigation'
 import { useMemo, useState } from 'react'
 import { trackFormStartOnce } from '@/lib/analytics/optimizely-web-events'
+import { isThaiPath } from '@/lib/utils/locale-from-path'
 import CompositionNodeRenderer from '@/components/forms/composition-node-renderer'
 import ApplicationCardBlock from '@/components/block/application-card-block'
 
@@ -150,6 +152,7 @@ const normalizeNodesForStepSplitting = (items: any[]) => {
 }
 
 export default function OptimizelyFormRenderer(props: any) {
+  const pathname = usePathname()
   const [formState, setFormState] = useState<Record<string, any>>({})
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isSubmitted, setIsSubmitted] = useState(false)
@@ -179,12 +182,8 @@ export default function OptimizelyFormRenderer(props: any) {
       return title || `Step ${index + 1}`
     })
 
-    const isThai = typeof window !== 'undefined'
-      ? window.location.pathname.includes('/th/')
-      : false
-
-    return [...titles, isThai ? 'ยืนยันข้อมูล' : 'Confirmation']
-  }, [hasMultiStep, formSteps])
+    return [...titles, isThaiPath(pathname) ? 'ยืนยันข้อมูล' : 'Confirmation']
+  }, [hasMultiStep, formSteps, pathname])
 
   const rawConfirmationMessage =
     props?.SubmitConfirmationMessage ||

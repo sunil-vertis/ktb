@@ -13,13 +13,11 @@ export default async function PreviewLayout({
   const headerContent = await fetchSiteHeaderCms(PREVIEW_LOCALE)
   return (
     <html lang={PREVIEW_LOCALE} suppressHydrationWarning>
-      <head>
-        <OptimizelyWebSnippetHead />
-      </head>
       <body
         className="flex min-h-screen flex-col antialiased"
         suppressHydrationWarning
       >
+        <OptimizelyWebSnippetHead />
         <Header locale={PREVIEW_LOCALE} content={headerContent} />
         <div className="flex-1">{children}</div>
         <Footer />

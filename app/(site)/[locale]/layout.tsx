@@ -26,13 +26,11 @@ export default async function RootLayout({
   const headerContent = await fetchSiteHeaderCms(locale)
   return (
     <html lang={locale} className="h-full" suppressHydrationWarning>
-      <head>
-        <OptimizelyWebSnippetHead />
-      </head>
       <body
         className="flex min-h-screen flex-col antialiased"
         suppressHydrationWarning
       >
+        <OptimizelyWebSnippetHead />
         <Header locale={locale} content={headerContent} />
         <main className="min-h-0 flex-1">{children}</main>
         <Footer />

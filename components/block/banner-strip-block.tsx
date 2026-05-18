@@ -42,21 +42,20 @@ export default function BannerStripBlock({
     () => dismissStorageKey?.trim() || 'ktb-banner-strip-dismissed',
     [dismissStorageKey]
   )
-  const [isVisible, setIsVisible] = useState<boolean | null>(null)
+  const [isVisible, setIsVisible] = useState(false)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    if (typeof window === 'undefined') return
+    setMounted(true)
     setIsVisible(window.sessionStorage.getItem(storageKey) !== '1')
   }, [storageKey])
 
   const handleDismiss = () => {
     setIsVisible(false)
-    if (typeof window !== 'undefined') {
-      window.sessionStorage.setItem(storageKey, '1')
-    }
+    window.sessionStorage.setItem(storageKey, '1')
   }
 
-  if (!isVisible) return null
+  if (!mounted || !isVisible) return null
 
   return (
     <section className={styles.bannerStrip} aria-label="Banner strip notice">

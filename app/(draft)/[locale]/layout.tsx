@@ -18,10 +18,8 @@ export default async function RootLayout({
 
   return (
     <html lang={locale} suppressHydrationWarning>
-      <head>
-        <OptimizelyWebSnippetHead />
-      </head>
       <body className="antialiased" suppressHydrationWarning>
+        <OptimizelyWebSnippetHead />
         <Script
           src={`${process.env.NEXT_PUBLIC_CMS_URL}/util/javascript/communicationinjector.js`}
         />

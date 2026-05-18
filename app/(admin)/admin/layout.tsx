@@ -7,11 +7,11 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
-      <head>
+    <html lang="en" suppressHydrationWarning>
+      <body suppressHydrationWarning>
         <OptimizelyWebSnippetHead />
-      </head>
-      <body>{children}</body>
+        {children}
+      </body>
     </html>
   )
 }

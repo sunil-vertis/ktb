@@ -1,6 +1,9 @@
 'use client'
 
+import { usePathname } from 'next/navigation'
+
 import { GlobalIcon } from '@/components/ui/global-icon'
+import { isThaiPath } from '@/lib/utils/locale-from-path'
 import {
   isRequiredValidator,
   registerRequiredField,
@@ -72,10 +75,11 @@ export default function SelectionElement({
     formState?.['จังหวัด']
   const isDistrictDisabled = isDistrictField && !selectedProvince
 
+  const pathname = usePathname()
   const locationOptionsList = locationOptions ?? []
   const normalOptions = getCmsOptions(element.Options)
 
-  const isThaiPage = typeof window !== 'undefined' && window.location.pathname.includes('/th/')
+  const isThaiPage = isThaiPath(pathname)
   const isThaiText = (value?: string) => /[\u0E00-\u0E7F]/.test(value || '')
   const localizedLocationOptions = locationOptionsList.filter((option) => {
     const label = option.label || option.value || ''
@@ -143,19 +147,11 @@ export default function SelectionElement({
         >
           <option value="" disabled>
             {isDistrictDisabled
-              ? (
-                  typeof window !== 'undefined' &&
-                  window.location.pathname.includes('/th/')
-                    ? 'กรุณาเลือกจังหวัดก่อน'
-                    : 'Select province first'
-                )
+              ? isThaiPage
+                ? 'กรุณาเลือกจังหวัดก่อน'
+                : 'Select province first'
               : element.Placeholder ||
-                (
-                  typeof window !== 'undefined' &&
-                  window.location.pathname.includes('/th/')
-                    ? 'เลือกข้อมูล'
-                    : 'Select an option'
-                )}
+                (isThaiPage ? 'เลือกข้อมูล' : 'Select an option')}
           </option>
 
           {filteredOptions.map((option: any, index: number) => {

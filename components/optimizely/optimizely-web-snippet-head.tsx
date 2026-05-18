@@ -1,11 +1,11 @@
+'use client'
+
+import Script from 'next/script'
+
 /**
- * Optimizely Web Experimentation / Personalization snippet (loads from CDN).
- * Snippet ID: Optimizely → Settings → Implementation, or your project’s “JS snippet” URL.
- *
- * Optional env: `NEXT_PUBLIC_OPTIMIZELY_WEB_SNIPPET_ID` (digits only). If unset, uses the
- * project default below. Set to empty string to skip loading the script (extend logic if needed).
- *
- * Uses a synchronous vendor `<script>` in `<head>` per Optimizely’s implementation guidance.
+ * Optimizely Web Experimentation / Personalization snippet.
+ * Loaded with `afterInteractive` so the vendor script does not run before React hydration
+ * (sync `<script>` in `<head>` causes React #418 on production).
  */
 const DEFAULT_SNIPPET_ID = '4755673972473856'
 
@@ -18,12 +18,15 @@ function resolveSnippetId(): string | null {
   return DEFAULT_SNIPPET_ID
 }
 
-/** Renders inside `<head>` of a root layout. */
+/** Place at the start of `<body>` in a root layout (not inside `<head>`). */
 export function OptimizelyWebSnippetHead() {
   const id = resolveSnippetId()
   if (!id) return null
   return (
-    // eslint-disable-next-line @next/next/no-sync-scripts -- Optimizely CDN snippet (vendor-recommended load order)
-    <script src={`https://cdn.optimizely.com/js/${id}.js`} />
+    <Script
+      id="optimizely-web-snippet"
+      src={`https://cdn.optimizely.com/js/${id}.js`}
+      strategy="afterInteractive"
+    />
   )
 }

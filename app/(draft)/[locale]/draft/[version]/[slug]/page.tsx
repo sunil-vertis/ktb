@@ -13,6 +13,12 @@ export const dynamic = 'force-dynamic'
 
 export default async function CmsPage(props: {
   params: Promise<{ locale: string; version: string; slug?: string }>
+  searchParams: Promise<{
+    key?: string
+    ver?: string
+    loc?: string
+    ctx?: string
+  }>
 }) {
   const isDraftModeEnabled = await checkDraftMode()
   if (!isDraftModeEnabled) {
@@ -20,6 +26,7 @@ export default async function CmsPage(props: {
   }
 
   const { locale, slug = '', version } = await props.params
+  const sp = await props.searchParams
   const locales = getValidLocale(locale)
   const formattedSlug = `/${slug}`
 
@@ -49,12 +56,22 @@ export default async function CmsPage(props: {
       })
     : null
 
+  const pageKey = page?._metadata?.key?.trim() || null
+  const previewQuery = new URLSearchParams()
+  if (sp.key) previewQuery.set('key', sp.key)
+  if (sp.ver) previewQuery.set('ver', sp.ver)
+  if (sp.loc) previewQuery.set('loc', sp.loc)
+  if (sp.ctx) previewQuery.set('ctx', sp.ctx)
+  const querySuffix = previewQuery.toString() ? `?${previewQuery.toString()}` : ''
+  const currentRoute = `/${locale}/draft/${version}/${slug}${querySuffix}`
+
   return (
-    <div className="container py-10" data-epi-edit="blocks">
-      <OnPageEdit
-        version={version}
-        currentRoute={`/${locale}/draft/${version}/${slug}`}
-      />
+    <div
+      className="container py-10"
+      data-epi-edit="blocks"
+      {...(pageKey ? { 'data-epi-block-id': pageKey } : {})}
+    >
+      <OnPageEdit version={version} currentRoute={currentRoute} />
       {breadcrumbItems ? <Breadcrumb items={breadcrumbItems} /> : null}
       <Suspense>
         <ContentAreaMapper blocks={blocks} preview />

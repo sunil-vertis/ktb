@@ -13,6 +13,7 @@ query getPreviewPageByURL(
     item {
       title
       _metadata {
+        key
         displayName
         url {
           default

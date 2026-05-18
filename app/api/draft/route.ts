@@ -10,12 +10,38 @@ export const dynamic = 'force-dynamic'
 const graphPreviewFromToken = (previewJwt: string) =>
   ({ preview: true, previewJwt }) as const
 
+/** Preserve CMS preview params on draft URLs so shell context can resolve content. */
+function appendCmsPreviewParams(
+  path: string,
+  {
+    key,
+    ver,
+    loc,
+    ctx,
+  }: {
+    key: string
+    ver: string
+    loc: string
+    ctx: string | null
+  }
+) {
+  const params = new URLSearchParams()
+  params.set('key', key)
+  params.set('ver', ver)
+  params.set('loc', loc)
+  if (ctx?.trim()) {
+    params.set('ctx', ctx.trim())
+  }
+  return `${path}?${params.toString()}`
+}
+
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
   const token = searchParams.get('preview_token')
   const key = searchParams.get('key')
   const ver = searchParams.get('ver')
   const loc = searchParams.get('loc')
+  const ctx = searchParams.get('ctx')
 
   if (!ver || !token || !key) {
     return notFound()
@@ -71,13 +97,19 @@ export async function GET(request: NextRequest) {
 
     if (vbResponse.data?.SEOExperience?.item) {
       ;(await draftMode()).enable()
-      redirect(`/${localeSeg}/draft/${ver}/experience/${key}`)
+      redirect(
+        appendCmsPreviewParams(
+          `/${localeSeg}/draft/${ver}/experience/${key}`,
+          { key, ver, loc: localeSeg, ctx }
+        )
+      )
     }
 
     return new NextResponse('Bad Request', { status: 400 })
   }
 
   const localeSeg = loc ?? DEFAULT_LOCALE
+  const previewParams = { key, ver, loc: localeSeg, ctx }
 
   ;(await draftMode()).enable()
   let newUrl = ''
@@ -94,12 +126,15 @@ export async function GET(request: NextRequest) {
       ''
     )
 
-    const hierarchicalUrlWithoutLocale = hierarchicalUrl?.replace(
-      `/${localeSeg}/`,
-      ''
-    )
-    newUrl = `/${localeSeg}/draft/${ver}/${hierarchicalUrlWithoutLocale}`
+    const hierarchicalUrlWithoutLocale =
+      hierarchicalUrl
+        ?.replace(`/${localeSeg}/`, '')
+        ?.replace(/^\/+|\/+$/g, '') ?? ''
+
+    newUrl = hierarchicalUrlWithoutLocale
+      ? `/${localeSeg}/draft/${ver}/${hierarchicalUrlWithoutLocale}`
+      : `/${localeSeg}/draft/${ver}`
   }
 
-  redirect(`${newUrl}`)
+  redirect(appendCmsPreviewParams(newUrl, previewParams))
 }

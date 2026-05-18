@@ -1,6 +1,12 @@
+'use client'
+
 import Link from 'next/link'
 import Image from 'next/image'
 
+import {
+  OPTIMIZELY_WEB_EVENTS,
+  trackOptimizelyEvent,
+} from '@/lib/analytics/optimizely-web-events'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import type { CtaSectionBlockFragmentFragment } from '@/lib/optimizely/types/generated'
@@ -76,7 +82,16 @@ export function CtaSectionBlockFE({
               size="lg"
               className={styles.actionBtn}
             >
-              <Link href={primaryHref}>{primaryLabel}</Link>
+              <Link
+                href={primaryHref}
+                onClick={() =>
+                  trackOptimizelyEvent(OPTIMIZELY_WEB_EVENTS.CTA_FORM_CLICK, {
+                    source: 'cta-section-primary',
+                  })
+                }
+              >
+                {primaryLabel}
+              </Link>
             </Button>
             <Button
               asChild
@@ -85,7 +100,16 @@ export function CtaSectionBlockFE({
               size="lg"
               className={styles.actionBtn}
             >
-              <Link href={secondaryHref}>{secondaryLabel}</Link>
+              <Link
+                href={secondaryHref}
+                onClick={() =>
+                  trackOptimizelyEvent(OPTIMIZELY_WEB_EVENTS.CTA_FORM_CLICK, {
+                    source: 'cta-section-secondary',
+                  })
+                }
+              >
+                {secondaryLabel}
+              </Link>
             </Button>
           </div>
         </div>

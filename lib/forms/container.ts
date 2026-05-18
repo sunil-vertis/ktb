@@ -121,6 +121,7 @@ export function buildFormComponent(
     rows: node.rows,
     nodes: node.nodes,
     elements: node.elements,
+    DisplayName: formSettings?.displayName,
     Title: formSettings?.Title,
     Description: formSettings?.Description,
     SubmitConfirmationMessage: formSettings?.SubmitConfirmationMessage,

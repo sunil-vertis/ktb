@@ -24,6 +24,7 @@ export default function FormFieldRenderer({
   onSubmitSuccess,
   currentStepRequiredFields = [],
   isLastFormStep,
+  formDisplayName,
   onNextStep,
 }: {
   node: any
@@ -35,6 +36,7 @@ export default function FormFieldRenderer({
   onSubmitSuccess?: (referenceNumber?: string) => void
   currentStepRequiredFields?: string[]
   isLastFormStep?: boolean
+  formDisplayName?: string
   onNextStep?: () => void
 }) {
   const component = node?.component
@@ -88,6 +90,7 @@ export default function FormFieldRenderer({
           onSubmitSuccess={onSubmitSuccess}
           currentStepRequiredFields={currentStepRequiredFields}
           isLastFormStep={isLastFormStep}
+          formDisplayName={formDisplayName}
           onNextStep={onNextStep}
         />
       )

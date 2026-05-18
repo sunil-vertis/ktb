@@ -5,6 +5,8 @@ import {
   registerRequiredField,
   updateFormValue,
   validateFieldValue,
+  isRegexValidator,
+  getRegexPattern,
 } from '@/lib/forms/utils/validation'
 
 export default function TextareaElement({
@@ -51,14 +53,16 @@ export default function TextareaElement({
 
           if (!fieldName) return
 
-          const newErrors = validateFieldValue({
-            fieldName,
-            value,
-            validators: element.Validators,
-            errors,
-          })
-
-          setErrors?.(newErrors)
+          setErrors?.((prevErrors) =>
+            validateFieldValue({
+              fieldName,
+              value,
+              validators: element.Validators,
+              errors: prevErrors,
+              isRegex: isRegexValidator(element.Validators),
+              regexPattern: getRegexPattern(element.Validators),
+            })
+          )
         }}
       />
 

@@ -6,6 +6,8 @@ import {
   registerRequiredField,
   updateFormValue,
   validateFieldValue,
+  isRegexValidator,
+  getRegexPattern,
 } from '@/lib/forms/utils/validation'
 
 export default function TextboxElement({
@@ -28,7 +30,7 @@ export default function TextboxElement({
   })
 
   const fieldError = fieldName ? errors?.[fieldName] : undefined
-
+  
   return (
     <div className="registration-block__field">
       <label className="registration-block__label">
@@ -47,6 +49,11 @@ export default function TextboxElement({
         className={`registration-block__input ${
           fieldError ? 'registration-block__input--error' : ''
         }`}
+        pattern={
+          isRegexValidator(element.Validators)
+            ? getRegexPattern(element.Validators)
+            : undefined
+        }
         onChange={(event) => {
           const value = event.target.value
 
@@ -54,15 +61,17 @@ export default function TextboxElement({
 
           if (!fieldName) return
 
-          const newErrors = validateFieldValue({
-            fieldName,
-            value,
-            validators: element.Validators,
-            errors,
-            isEmail: isEmailValidator(element.Validators),
-          })
-
-          setErrors?.(newErrors)
+          setErrors?.((prevErrors) =>
+            validateFieldValue({
+              fieldName,
+              value,
+              validators: element.Validators,
+              errors: prevErrors,
+              isEmail: isEmailValidator(element.Validators),
+              isRegex: isRegexValidator(element.Validators),
+              regexPattern: getRegexPattern(element.Validators),
+            })
+          )
         }}
       />
 

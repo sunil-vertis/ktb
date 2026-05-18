@@ -12,9 +12,13 @@ export const isRequiredValidator = (validators: any) => {
 }
 
 export const isEmailValidator = (validators: any) => {
-  if (!validators) return false
+  if (!Array.isArray(validators)) return false
 
-  return JSON.stringify(validators).toLowerCase().includes('email')
+  return validators.some((validator: any) =>
+    String(validator?.type || validator?.Type || validator?.name || '')
+      .toLowerCase()
+      .includes('email')
+  )
 }
 
 export const getRequiredErrorMessage = (validators: any) => {
@@ -71,6 +75,8 @@ export const validateFieldValue = ({
   validators,
   errors,
   isEmail = false,
+  isRegex = false,
+  regexPattern,
   digitLimit,
   digitMessage,
 }: {
@@ -79,6 +85,8 @@ export const validateFieldValue = ({
   validators: any
   errors?: Record<string, string>
   isEmail?: boolean
+  isRegex?: boolean
+  regexPattern?: string 
   digitLimit?: number | null
   digitMessage?: string
 }) => {
@@ -89,9 +97,13 @@ export const validateFieldValue = ({
     newErrors[fieldName] = getRequiredErrorMessage(validators)
   } else if (isEmail && stringValue && !isValidEmailValue(stringValue)) {
     newErrors[fieldName] = getEmailErrorMessage(validators)
-  } else if (digitLimit && stringValue.length !== digitLimit) {
-    newErrors[fieldName] =
-      digitMessage || getRequiredErrorMessage(validators)
+  } else if (
+    isRegex &&
+    regexPattern &&
+    stringValue &&
+    !new RegExp(regexPattern).test(stringValue)
+  ) {
+    newErrors[fieldName] = getRegexErrorMessage(validators)
   } else {
     delete newErrors[fieldName]
   }
@@ -115,4 +127,61 @@ export const registerRequiredField = ({
   if (!formState.__requiredFields.includes(fieldName)) {
     formState.__requiredFields.push(fieldName)
   }
+}
+
+export const isRegexValidator = (validators: any) => {
+  if (!Array.isArray(validators)) return false
+
+  return validators.some((validator: any) => {
+    const type = String(
+      validator?.type ||
+      validator?.Type ||
+      validator?.name ||
+      ''
+    ).toLowerCase()
+
+    return (
+      type === 'regularexpressionvalidator' ||
+      type.includes('regularexpression')
+    )
+  })
+}
+
+export const getRegexValidator = (validators: any) => {
+  if (!Array.isArray(validators)) return null
+
+  return validators.find((validator: any) => {
+    const type = String(
+      validator?.type ||
+      validator?.Type ||
+      validator?.name ||
+      ''
+    ).toLowerCase()
+
+    return (
+      type === 'regularexpressionvalidator' ||
+      type.includes('regularexpression')
+    )
+  })
+}
+
+export const getRegexErrorMessage = (validators: any) => {
+  const regexValidator = getRegexValidator(validators)
+
+  return (
+    regexValidator?.errorMessage ||
+    regexValidator?.message ||
+    'Invalid format.'
+  )
+}
+
+export const getRegexPattern = (validators: any) => {
+  const regexValidator = getRegexValidator(validators)
+
+  return (
+    regexValidator?.regularExpression ||
+    regexValidator?.pattern ||
+    regexValidator?.regex ||
+    ''
+  )
 }

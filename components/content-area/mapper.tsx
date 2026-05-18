@@ -55,39 +55,17 @@ function ContentAreaMapper({
 
   return (
     <>
-      {blocks?.map((block, index) => {
-        const typeName = block?.__typename
-        if (!typeName) return null
-
-        const { _metadata, ...blockFields } = block as {
-          __typename: string
-          _metadata?: { key?: string | null } | null
-          [key: string]: unknown
-        }
-        const blockKey = _metadata?.key?.trim() || null
-        const reactKey = blockKey ?? `${typeName}--${index}`
-
-        const element = (
-          <Block
-            typeName={typeName}
-            props={{
-              ...blockFields,
-              isFirst: index === 0,
-              preview,
-            }}
-          />
-        )
-
-        if (preview && blockKey) {
-          return (
-            <div data-epi-block-id={blockKey} key={`wrap-${reactKey}`}>
-              {element}
-            </div>
-          )
-        }
-
-        return <div key={reactKey}>{element}</div>
-      })}
+      {blocks?.map(({ __typename, ...props }, index) => (
+        <Block
+          key={`${__typename satisfies string}--${index}`}
+          typeName={__typename}
+          props={{
+            ...props,
+            isFirst: index === 0,
+            preview,
+          }}
+        />
+      ))}
     </>
   )
 }

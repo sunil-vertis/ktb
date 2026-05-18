@@ -18,6 +18,7 @@ export default function CompositionNodeRenderer({
   onSubmitSuccess,
   currentStepRequiredFields = [],
   isLastFormStep,
+  formDisplayName,
   onNextStep,
 }: {
   node: any
@@ -29,6 +30,7 @@ export default function CompositionNodeRenderer({
   onSubmitSuccess?: (referenceNumber?: string) => void
   currentStepRequiredFields?: string[]
   isLastFormStep?: boolean
+  formDisplayName?: string
   onNextStep?: () => void
 }) {
   if (!node) return null
@@ -49,6 +51,7 @@ export default function CompositionNodeRenderer({
           onSubmitSuccess={onSubmitSuccess}
           currentStepRequiredFields={currentStepRequiredFields}
           isLastFormStep={isLastFormStep}
+          formDisplayName={formDisplayName}
           onNextStep={onNextStep}
         />
       </div>
@@ -81,6 +84,7 @@ export default function CompositionNodeRenderer({
           onSubmitSuccess={onSubmitSuccess}
           currentStepRequiredFields={currentStepRequiredFields}
           isLastFormStep={isLastFormStep}
+          formDisplayName={formDisplayName}
           onNextStep={onNextStep}
         />
       ))}

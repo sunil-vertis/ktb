@@ -15,6 +15,10 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import {
+  OPTIMIZELY_WEB_EVENTS,
+  trackOptimizelyEvent,
+} from '@/lib/analytics/optimizely-web-events'
+import {
   searchResults,
   type SearchResultKind,
   type SearchResultRow,
@@ -522,7 +526,20 @@ export function SearchResultsBlock({
                             ) : null}
                           </div>
                           <h2 className={styles.resultTitle}>
-                            <Link href={href}>{item.title}</Link>
+                            <Link
+                              href={href}
+                              onClick={() =>
+                                trackOptimizelyEvent(
+                                  OPTIMIZELY_WEB_EVENTS.VIEW_CONTENT_DETAILS,
+                                  {
+                                    path: item.path,
+                                    kind: item.kind,
+                                  }
+                                )
+                              }
+                            >
+                              {item.title}
+                            </Link>
                           </h2>
                           {item.description ? (
                             <p className={styles.resultDesc}>

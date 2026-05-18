@@ -1,6 +1,10 @@
 'use client'
 
 import { useState } from 'react'
+import {
+  OPTIMIZELY_WEB_EVENTS,
+  trackOptimizelyEvent,
+} from '@/lib/analytics/optimizely-web-events'
 import { Button } from '@/components/ui/button'
 
 export default function SubmitElement({
@@ -10,6 +14,7 @@ export default function SubmitElement({
   onSubmitSuccess,
   currentStepRequiredFields = [],
   isLastFormStep,
+  formDisplayName,
   onNextStep,
 }: {
   element: any
@@ -18,6 +23,7 @@ export default function SubmitElement({
   onSubmitSuccess?: (referenceNumber?: string) => void
   currentStepRequiredFields?: string[]
   isLastFormStep?: boolean
+  formDisplayName?: string
   onNextStep?: () => void
 }) {
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -50,7 +56,7 @@ export default function SubmitElement({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          formName: 'Registration Form',
+          formName: formDisplayName || 'Unknown Form',
           fields: formState,
           locale,
         }),
@@ -63,6 +69,9 @@ export default function SubmitElement({
         return
       }
 
+      trackOptimizelyEvent(OPTIMIZELY_WEB_EVENTS.FORM_SUBMIT, {
+        formName: formDisplayName || 'Unknown Form',
+      })
       onSubmitSuccess?.(result.referenceNumber)
     } catch (error) {
       console.error('Submit error:', error)
@@ -83,7 +92,7 @@ export default function SubmitElement({
       {isSubmitting ? (
         <span className="registration-block__button-loader-wrap">
           <span className="registration-block__button-loader" />
-          Submitting...
+          {submitLabel} ...
         </span>
       ) : (
         submitLabel

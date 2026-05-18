@@ -3,6 +3,11 @@
 import * as React from 'react'
 import clsx from 'clsx'
 
+import {
+  OPTIMIZELY_WEB_EVENTS,
+  trackFormStartOnce,
+  trackOptimizelyEvent,
+} from '@/lib/analytics/optimizely-web-events'
 import { Button } from '@/components/ui/button'
 
 import type { RequestInformationBlockFragmentFragment } from '@/lib/optimizely/types/generated'
@@ -105,6 +110,9 @@ export function RequestInformationBlockFE({
 
     if (!isFormValid) return
 
+    trackOptimizelyEvent(OPTIMIZELY_WEB_EVENTS.FORM_SUBMIT, {
+      formId: 'request-information',
+    })
     onSubmit?.(values)
   }
 
@@ -126,7 +134,12 @@ export function RequestInformationBlockFE({
           </div>
         </div>
 
-        <form className="request-information__form" onSubmit={onFormSubmit} noValidate>
+        <form
+          className="request-information__form"
+          onSubmit={onFormSubmit}
+          onFocusCapture={() => trackFormStartOnce({ formId: 'request-information' })}
+          noValidate
+        >
           <div className="request-information__grid">
             <label className="request-information__field">
               <span className="request-information__label type-label-default">

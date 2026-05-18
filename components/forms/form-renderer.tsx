@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import { trackFormStartOnce } from '@/lib/analytics/optimizely-web-events'
 import CompositionNodeRenderer from '@/components/forms/composition-node-renderer'
 import ApplicationCardBlock from '@/components/block/application-card-block'
 
@@ -192,7 +193,6 @@ export default function OptimizelyFormRenderer(props: any) {
 
   const [referenceNumber, setReferenceNumber] = useState('')
   const confirmationMessage = rawConfirmationMessage.replace(/\{Ref\}/g, referenceNumber)
-
   const isLastFormStep = currentStepIndex === formSteps.length - 1
 
   if (isSubmitted) {
@@ -237,7 +237,14 @@ export default function OptimizelyFormRenderer(props: any) {
         {props.Description && (<p className="personal-loan-calculator__subtitle type-body-base-regular">{props.Description}</p>)}
         <StepIndicator currentStep={currentStepIndex + 1} steps={stepTitles} />
         <div className="registration-block__card">
-          <form className="registration-block__form-fields">
+          <form
+            className="registration-block__form-fields"
+            onFocusCapture={() =>
+              trackFormStartOnce({
+                formId: props?.displayName || props?.key || 'optimizely-form',
+              })
+            }
+          >
             {currentStepNodes.map((node: any, index: number) => (
               <CompositionNodeRenderer
                 key={node.key || index}
@@ -249,6 +256,7 @@ export default function OptimizelyFormRenderer(props: any) {
                 locationOptions={props.locationOptions}
                 currentStepRequiredFields={currentStepRequiredFields}
                 isLastFormStep={isLastFormStep}
+                formDisplayName={props?.displayName}
                 onNextStep={() => setCurrentStepIndex((prev) => prev + 1)}
                 onSubmitSuccess={(ref) => {
                   setReferenceNumber(ref || '')

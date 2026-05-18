@@ -84,24 +84,26 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    let staffEmailBody = templates.staff.EmailBody?.html || ''
+    if (templates.staff) {
+      let staffEmailBody = templates.staff.EmailBody?.html || ''
 
-    staffEmailBody = staffEmailBody.replace(/\{Ref\}/g, referenceNumber)
+      staffEmailBody = staffEmailBody.replace(/\{Ref\}/g, referenceNumber)
 
-    emailResults.push(
-      await sendEmail({
-        to: templates.staff.ToEmail,
-        from: templates.staff.FromEmail,
-        cc: templates.staff.CcEmail,
-        subject: templates.staff.Subject || formName,
-        html: buildEmailHtml({
-          body: staffEmailBody,
-          fields,
-          referenceNumber,
-          locale,
-        }),
-      })
-    )
+      emailResults.push(
+        await sendEmail({
+          to: templates.staff.ToEmail,
+          from: templates.staff.FromEmail,
+          cc: templates.staff.CcEmail,
+          subject: templates.staff.Subject || formName,
+          html: buildEmailHtml({
+            body: staffEmailBody,
+            fields,
+            referenceNumber,
+            locale,
+          }),
+        })
+      )
+    }
 
     const hasEmailFailure = emailResults.some((result) => !result.success)
 

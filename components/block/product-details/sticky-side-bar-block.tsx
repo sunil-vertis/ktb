@@ -8,6 +8,10 @@ import { Button } from '@/components/ui/button'
 
 import type { StickySideBarBlockFragmentFragment } from '@/lib/optimizely/types/generated'
 import {
+  OPTIMIZELY_WEB_EVENTS,
+  trackOptimizelyEvent,
+} from '@/lib/analytics/optimizely-web-events'
+import {
   getKrungthaiNextStoreUrl,
   KRUNGTHAI_NEXT_PLAY_STORE_URL,
   shouldOpenKrungthaiNextModal,
@@ -63,8 +67,18 @@ export function StickySideBarBlockFE({
     setStoreHref(getKrungthaiNextStoreUrl())
   }, [])
 
+  const trackPrimaryCtaClick = React.useCallback(() => {
+    onPrimaryClick?.()
+    trackOptimizelyEvent(OPTIMIZELY_WEB_EVENTS.CTA_FORM_CLICK, {
+      source: 'sticky-side-bar-primary',
+    })
+  }, [onPrimaryClick])
+
   const onSecondaryActivate = React.useCallback(
     (e: React.MouseEvent<HTMLAnchorElement>) => {
+      trackOptimizelyEvent(OPTIMIZELY_WEB_EVENTS.CLICK_APP_DOWNLOAD, {
+        source: 'sticky-side-bar-secondary',
+      })
       if (shouldOpenKrungthaiNextModal()) {
         e.preventDefault()
         onSecondaryClick?.()
@@ -104,13 +118,15 @@ export function StickySideBarBlockFE({
             className="sticky-side-bar__action-btn sticky-side-bar__action-btn--primary"
             asChild
           >
-            <a href={primaryCtaHref}>{primaryCtaLabel}</a>
+            <a href={primaryCtaHref} onClick={trackPrimaryCtaClick}>
+              {primaryCtaLabel}
+            </a>
           </Button>
         ) : (
           <Button
             size="lg"
             className="sticky-side-bar__action-btn sticky-side-bar__action-btn--primary"
-            onClick={onPrimaryClick}
+            onClick={trackPrimaryCtaClick}
             type="button"
           >
             {primaryCtaLabel}

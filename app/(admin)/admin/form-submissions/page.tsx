@@ -183,7 +183,7 @@ const buildFileName = ({
     const from = fromDate ? toApiDate(fromDate) : 'start'
     const to = toDate ? toApiDate(toDate) : 'end'
 
-    return `${safeFormName}-Submissions-${from}-to-${to}.${extension}`
+    return `${safeFormName}-Submissions-${from}-to-${to}.${extension}`.toLowerCase()
   }
 
   return `${safeFormName}-All-Submissions-${mmddyyhhmm}.${extension}`.toLowerCase()

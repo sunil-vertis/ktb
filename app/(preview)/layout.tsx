@@ -1,5 +1,6 @@
 import '@/app/globals.css'
 import '@/styles/main.scss'
+import { OptimizelyWebSnippetHead } from '@/components/optimizely/optimizely-web-snippet-head'
 import { Header } from '@/components/layout/header'
 import { fetchSiteHeaderCms } from '@/components/layout/header-cms'
 import { Footer } from '@/components/layout/footer'
@@ -12,6 +13,9 @@ export default async function PreviewLayout({
   const headerContent = await fetchSiteHeaderCms(PREVIEW_LOCALE)
   return (
     <html lang={PREVIEW_LOCALE} suppressHydrationWarning>
+      <head>
+        <OptimizelyWebSnippetHead />
+      </head>
       <body
         className="flex min-h-screen flex-col antialiased"
         suppressHydrationWarning

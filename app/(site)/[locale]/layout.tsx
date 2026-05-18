@@ -1,5 +1,6 @@
 import '@/app/globals.css'
 import '@/styles/main.scss'
+import { OptimizelyWebSnippetHead } from '@/components/optimizely/optimizely-web-snippet-head'
 import { LOCALES } from '@/lib/optimizely/utils/language'
 import { Header } from '@/components/layout/header'
 import { fetchSiteHeaderCms } from '@/components/layout/header-cms'
@@ -25,6 +26,9 @@ export default async function RootLayout({
   const headerContent = await fetchSiteHeaderCms(locale)
   return (
     <html lang={locale} className="h-full" suppressHydrationWarning>
+      <head>
+        <OptimizelyWebSnippetHead />
+      </head>
       <body
         className="flex min-h-screen flex-col antialiased"
         suppressHydrationWarning

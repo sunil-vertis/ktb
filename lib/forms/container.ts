@@ -121,16 +121,13 @@ export function buildFormComponent(
     rows: node.rows,
     nodes: node.nodes,
     elements: node.elements,
-    SubmitConfirmationMessage:
-      formSettings?.SubmitConfirmationMessage,
-    ResetConfirmationMessage:
-      formSettings?.ResetConfirmationMessage,
-    ShowSummaryMessageAfterSubmission:
-      formSettings?.ShowSummaryMessageAfterSubmission,
+    Title: formSettings?.Title,
+    Description: formSettings?.Description,
+    SubmitConfirmationMessage: formSettings?.SubmitConfirmationMessage,
+    ResetConfirmationMessage: formSettings?.ResetConfirmationMessage,
+    ShowSummaryMessageAfterSubmission: formSettings?.ShowSummaryMessageAfterSubmission,
     SubmitUrl: formSettings?.SubmitUrl,
-    PromotionBlock:
-      formSettings?.PromotionBlockData,
-    ShowThisPromotion:
-      formSettings?.PromotionBlockData?.ShowThisPromotion,
+    PromotionBlock: formSettings?.PromotionBlockData,
+    ShowThisPromotion: formSettings?.PromotionBlockData?.ShowThisPromotion,
   }
 }

@@ -199,6 +199,8 @@ export default function OptimizelyFormRenderer(props: any) {
     return (
       <section className="registration-block">
         <div className="registration-block__container">
+          {props.Title && (<h2 className="personal-loan-calculator__title type-heading-h3">{props.Title}</h2>)}
+          {props.Description && (<p className="personal-loan-calculator__subtitle type-body-base-regular">{props.Description}</p>)}
           <StepIndicator currentStep={stepTitles.length} steps={stepTitles} />
           <div className="registration-block__card registration-block__card--plain">
             <div className="registration-block__confirmation-card">
@@ -231,8 +233,9 @@ export default function OptimizelyFormRenderer(props: any) {
   return (
     <section className="registration-block">
       <div className="registration-block__container">
+        {props.Title && (<h2 className="personal-loan-calculator__title type-heading-h3">{props.Title}</h2>)}
+        {props.Description && (<p className="personal-loan-calculator__subtitle type-body-base-regular">{props.Description}</p>)}
         <StepIndicator currentStep={currentStepIndex + 1} steps={stepTitles} />
-
         <div className="registration-block__card">
           <form className="registration-block__form-fields">
             {currentStepNodes.map((node: any, index: number) => (

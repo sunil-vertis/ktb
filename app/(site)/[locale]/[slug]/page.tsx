@@ -13,7 +13,9 @@ import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { Suspense } from 'react'
 import { mapLocationsToOptions } from '@/lib/forms/utils/selection'
+import { renderCmsPagePreview } from '@/lib/preview/render-cms-page-preview'
 import { buildCmsPageBreadcrumbItems } from '@/lib/utils/page-breadcrumbs'
+import { draftMode } from 'next/headers'
 
 export async function generateMetadata(props: {
   params: Promise<{ locale: string; slug?: string }>
@@ -97,8 +99,27 @@ export async function generateStaticParams() {
 
 export default async function CmsPage(props: {
   params: Promise<{ locale: string; slug?: string }>
+  searchParams: Promise<{
+    key?: string
+    ver?: string
+    loc?: string
+    ctx?: string
+  }>
 }) {
   const { locale, slug = '' } = await props.params
+  const sp = await props.searchParams
+  const { isEnabled: isDraftPreview } = await draftMode()
+  const previewVersion = sp.ver?.trim()
+
+  if (isDraftPreview && previewVersion) {
+    return renderCmsPagePreview({
+      locale,
+      slug,
+      version: previewVersion,
+      searchParams: sp,
+    })
+  }
+
   const locales = getValidLocale(locale)
   const formattedSlug = `/${slug}`
   const { data, errors } = await optimizely.getPageByURL({

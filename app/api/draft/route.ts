@@ -4,36 +4,15 @@ import { NextRequest, NextResponse } from 'next/server'
 
 import { OPTIMIZELY_PREVIEW_JWT_COOKIE, optimizely } from '@/lib/optimizely/fetch'
 import { DEFAULT_LOCALE, getValidLocale } from '@/lib/optimizely/utils/language'
+import {
+  appendCmsPreviewParams,
+  buildPublishedPreviewPath,
+} from '@/lib/preview/cms-preview-params'
 
 export const dynamic = 'force-dynamic'
 
 const graphPreviewFromToken = (previewJwt: string) =>
   ({ preview: true, previewJwt }) as const
-
-/** Preserve CMS preview params on draft URLs so shell context can resolve content. */
-function appendCmsPreviewParams(
-  path: string,
-  {
-    key,
-    ver,
-    loc,
-    ctx,
-  }: {
-    key: string
-    ver: string
-    loc: string
-    ctx: string | null
-  }
-) {
-  const params = new URLSearchParams()
-  params.set('key', key)
-  params.set('ver', ver)
-  params.set('loc', loc)
-  if (ctx?.trim()) {
-    params.set('ctx', ctx.trim())
-  }
-  return `${path}?${params.toString()}`
-}
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
@@ -121,19 +100,8 @@ export async function GET(request: NextRequest) {
   } else if (content.__typename === '_Component') {
     newUrl = `/${localeSeg}/draft/${ver}/block/${key}`
   } else {
-    const hierarchicalUrl = content?._metadata?.url?.hierarchical?.replace(
-      process.env.OPTIMIZELY_START_PAGE_URL ?? '',
-      ''
-    )
-
-    const hierarchicalUrlWithoutLocale =
-      hierarchicalUrl
-        ?.replace(`/${localeSeg}/`, '')
-        ?.replace(/^\/+|\/+$/g, '') ?? ''
-
-    newUrl = hierarchicalUrlWithoutLocale
-      ? `/${localeSeg}/draft/${ver}/${hierarchicalUrlWithoutLocale}`
-      : `/${localeSeg}/draft/${ver}`
+    // CMS pages: use published URL shape (/en/loan) so CMS Stores/context can resolve.
+    newUrl = buildPublishedPreviewPath(localeSeg, content)
   }
 
   redirect(appendCmsPreviewParams(newUrl, previewParams))

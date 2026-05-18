@@ -4,10 +4,6 @@ import { NextRequest, NextResponse } from 'next/server'
 
 import { OPTIMIZELY_PREVIEW_JWT_COOKIE, optimizely } from '@/lib/optimizely/fetch'
 import { DEFAULT_LOCALE, getValidLocale } from '@/lib/optimizely/utils/language'
-import {
-  appendCmsPreviewParams,
-  buildPublishedPreviewPath,
-} from '@/lib/preview/cms-preview-params'
 
 export const dynamic = 'force-dynamic'
 
@@ -20,7 +16,6 @@ export async function GET(request: NextRequest) {
   const key = searchParams.get('key')
   const ver = searchParams.get('ver')
   const loc = searchParams.get('loc')
-  const ctx = searchParams.get('ctx')
 
   if (!ver || !token || !key) {
     return notFound()
@@ -76,19 +71,13 @@ export async function GET(request: NextRequest) {
 
     if (vbResponse.data?.SEOExperience?.item) {
       ;(await draftMode()).enable()
-      redirect(
-        appendCmsPreviewParams(
-          `/${localeSeg}/draft/${ver}/experience/${key}`,
-          { key, ver, loc: localeSeg, ctx }
-        )
-      )
+      redirect(`/${localeSeg}/draft/${ver}/experience/${key}`)
     }
 
     return new NextResponse('Bad Request', { status: 400 })
   }
 
   const localeSeg = loc ?? DEFAULT_LOCALE
-  const previewParams = { key, ver, loc: localeSeg, ctx }
 
   ;(await draftMode()).enable()
   let newUrl = ''
@@ -100,9 +89,17 @@ export async function GET(request: NextRequest) {
   } else if (content.__typename === '_Component') {
     newUrl = `/${localeSeg}/draft/${ver}/block/${key}`
   } else {
-    // CMS pages: use published URL shape (/en/loan) so CMS Stores/context can resolve.
-    newUrl = buildPublishedPreviewPath(localeSeg, content)
+    const hierarchicalUrl = content?._metadata?.url?.hierarchical?.replace(
+      process.env.OPTIMIZELY_START_PAGE_URL ?? '',
+      ''
+    )
+
+    const hierarchicalUrlWithoutLocale = hierarchicalUrl?.replace(
+      `/${localeSeg}/`,
+      ''
+    )
+    newUrl = `/${localeSeg}/draft/${ver}/${hierarchicalUrlWithoutLocale}`
   }
 
-  redirect(appendCmsPreviewParams(newUrl, previewParams))
+  redirect(`${newUrl}`)
 }

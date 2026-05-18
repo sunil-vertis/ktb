@@ -484,9 +484,6 @@ fragment applicationCardBlock on ApplicationCardBlock {
 
 fragment ItemsInContentArea on _IContent {
   __typename
-  _metadata {
-    key
-  }
   ...HeroBlockFragment
   ...ContactBlockFragment
   ...LogosBlockFragment

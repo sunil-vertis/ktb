@@ -1,12 +1,10 @@
 import '@/app/globals.css'
 import '@/styles/main.scss'
-import { DraftPreviewRuntime } from '@/components/draft/draft-preview-runtime'
 import { OptimizelyWebSnippetHead } from '@/components/optimizely/optimizely-web-snippet-head'
 import { LOCALES } from '@/lib/optimizely/utils/language'
 import { Header } from '@/components/layout/header'
 import { fetchSiteHeaderCms } from '@/components/layout/header-cms'
 import { Footer } from '@/components/layout/footer'
-import { draftMode } from 'next/headers'
 
 export function generateStaticParams() {
   try {
@@ -26,7 +24,6 @@ export default async function RootLayout({
 }>) {
   const { locale } = await params
   const headerContent = await fetchSiteHeaderCms(locale)
-  const { isEnabled: isDraftPreview } = await draftMode()
   return (
     <html lang={locale} className="h-full" suppressHydrationWarning>
       <head>
@@ -36,7 +33,6 @@ export default async function RootLayout({
         className="flex min-h-screen flex-col antialiased"
         suppressHydrationWarning
       >
-        {isDraftPreview ? <DraftPreviewRuntime /> : null}
         <Header locale={locale} content={headerContent} />
         <main className="min-h-0 flex-1">{children}</main>
         <Footer />

@@ -2,31 +2,38 @@
 
 import Script from 'next/script'
 
+import { resolveOptimizelyWebSnippetId } from '@/lib/optimizely/web-snippet-id'
+import { logOptimizelyDiagnostic } from '@/lib/analytics/optimizely-web-events'
+
 /**
- * Optimizely Web Experimentation / Personalization snippet.
- * Loaded with `afterInteractive` so the vendor script does not run before React hydration
- * (sync `<script>` in `<head>` causes React #418 on production).
+ * Optimizely Web snippet — `afterInteractive` avoids React #418 hydration errors.
+ * Place at the start of `<body>` in a root layout.
  */
-const DEFAULT_SNIPPET_ID = '4755673972473856'
-
-function resolveSnippetId(): string | null {
-  const raw = process.env.NEXT_PUBLIC_OPTIMIZELY_WEB_SNIPPET_ID
-  if (raw === '') return null
-  const trimmed = raw?.trim()
-  if (trimmed && /^\d+$/.test(trimmed)) return trimmed
-  if (trimmed) return trimmed
-  return DEFAULT_SNIPPET_ID
-}
-
-/** Place at the start of `<body>` in a root layout (not inside `<head>`). */
 export function OptimizelyWebSnippetHead() {
-  const id = resolveSnippetId()
-  if (!id) return null
+  const id = resolveOptimizelyWebSnippetId()
+  if (!id) {
+    if (typeof window !== 'undefined') {
+      logOptimizelyDiagnostic('Snippet disabled (NEXT_PUBLIC_OPTIMIZELY_WEB_SNIPPET_ID=off)')
+    }
+    return null
+  }
+
+  const src = `https://cdn.optimizely.com/js/${id}.js`
+
   return (
     <Script
       id="optimizely-web-snippet"
-      src={`https://cdn.optimizely.com/js/${id}.js`}
+      src={src}
       strategy="afterInteractive"
+      onLoad={() => {
+        logOptimizelyDiagnostic('Snippet script loaded', { src })
+      }}
+      onError={() => {
+        console.error(
+          '[Optimizely] Failed to load snippet. Check snippet ID and network/CSP.',
+          { src }
+        )
+      }}
     />
   )
 }

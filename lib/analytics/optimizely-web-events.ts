@@ -17,18 +17,47 @@ type OptimizelyPushEntry =
   | { type: 'event'; eventName: string; tags?: Record<string, string> }
   | Record<string, unknown>
 
+type OptimizelyClient = OptimizelyPushEntry[] & {
+  get?: (key: string) => unknown
+  initialized?: boolean
+}
+
 declare global {
   interface Window {
-    optimizely?: OptimizelyPushEntry[]
+    optimizely?: OptimizelyClient
   }
 }
 
 const LOG_PREFIX = '[Optimizely]'
 
-/** Set `NEXT_PUBLIC_OPTIMIZELY_DEBUG=true` to log in production builds. Always logs in development. */
-function shouldLogOptimizelyEvents(): boolean {
+/** Dev, `NEXT_PUBLIC_OPTIMIZELY_DEBUG=true`, or `?optimizely_debug=1` on the URL. */
+export function shouldLogOptimizelyEvents(): boolean {
   if (process.env.NODE_ENV === 'development') return true
-  return process.env.NEXT_PUBLIC_OPTIMIZELY_DEBUG === 'true'
+  if (process.env.NEXT_PUBLIC_OPTIMIZELY_DEBUG === 'true') return true
+  if (typeof window !== 'undefined') {
+    try {
+      return new URLSearchParams(window.location.search).get('optimizely_debug') === '1'
+    } catch {
+      return false
+    }
+  }
+  return false
+}
+
+export function logOptimizelyDiagnostic(message: string, data?: Record<string, unknown>): void {
+  if (!shouldLogOptimizelyEvents()) return
+  console.log(LOG_PREFIX, message, data ?? '')
+}
+
+function isOptimizelyApiReady(): boolean {
+  return typeof window.optimizely?.get === 'function'
+}
+
+function getSnippetScriptInDom(): boolean {
+  return Boolean(
+    document.querySelector('script#optimizely-web-snippet') ||
+      document.querySelector('script[src*="cdn.optimizely.com/js/"]')
+  )
 }
 
 export function trackOptimizelyEvent(
@@ -52,7 +81,13 @@ export function trackOptimizelyEvent(
       tags: tags ?? null,
       payload,
       queueLength: window.optimizely.length,
-      snippetLoaded: typeof window.optimizely !== 'undefined',
+      apiReady: isOptimizelyApiReady(),
+      snippetScriptInDom: getSnippetScriptInDom(),
+      hint: !getSnippetScriptInDom()
+        ? 'Snippet script tag missing — set NEXT_PUBLIC_OPTIMIZELY_WEB_SNIPPET_ID or redeploy after env changes'
+        : !isOptimizelyApiReady()
+          ? 'Event queued; wait for snippet onLoad (afterInteractive). No logx POST until snippet runs.'
+          : 'Snippet ready — expect POST to logx.optimizely.com/v1/events',
     })
   }
 }
@@ -62,11 +97,9 @@ let formStartTracked = false
 
 export function trackFormStartOnce(tags?: Record<string, string>): void {
   if (formStartTracked) {
-    if (shouldLogOptimizelyEvents()) {
-      console.log(LOG_PREFIX, 'Form Start skipped (already tracked this page load)', {
-        tags: tags ?? null,
-      })
-    }
+    logOptimizelyDiagnostic('Form Start skipped (already tracked this page load)', {
+      tags: tags ?? null,
+    })
     return
   }
   formStartTracked = true
